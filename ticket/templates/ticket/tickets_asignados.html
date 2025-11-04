@@ -1,0 +1,831 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Mis Tickets Asignados - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .content-header h2 {
+        margin: 0;
+        color: #1a1a1a;
+        font-size: 28px;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card-title {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .stat-card-value {
+        color: #1a1a1a;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    /* Filtros */
+    .filters-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+    }
+
+    .filter-select {
+        padding: 10px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #c1121f;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+
+    .filter-select:hover {
+        border-color: #c1121f;
+    }
+
+    .btn-filtrar {
+        padding: 10px 24px;
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: fit-content;
+        margin-top: auto;
+    }
+
+    .btn-filtrar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.3);
+    }
+
+    /* Cards de Tickets */
+    .tickets-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+    }
+
+    .ticket-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ticket-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .ticket-card-header-image {
+        height: 120px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .ticket-card-header-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>');
+        opacity: 0.3;
+    }
+
+    .ticket-card-logo {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: 700;
+        color: white;
+        z-index: 1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .ticket-card-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ticket-card-id-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .ticket-card-id {
+        font-size: 24px;
+        font-weight: 700;
+        color: #c1121f;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-pendiente {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-en_proceso {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-resuelto {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cerrado {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .ticket-card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .ticket-card-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .ticket-card-info-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #c1121f;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .ticket-card-info-content {
+        flex: 1;
+    }
+
+    .ticket-card-info-label {
+        font-size: 12px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .ticket-card-info-value {
+        font-size: 14px;
+        color: #1a1a1a;
+        line-height: 1.5;
+    }
+
+    .prioridad-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .prioridad-baja {
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .prioridad-media {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .prioridad-alta {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .prioridad-urgente {
+        background: #fecaca;
+        color: #7f1d1d;
+        font-weight: 700;
+    }
+
+    .ticket-card-footer {
+        padding: 16px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ticket-card-date {
+        font-size: 12px;
+        color: #666;
+    }
+
+    /* Colores de gradiente según sede/dependencia */
+    .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .gradient-6 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+    .gradient-7 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+    .gradient-8 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        color: #1a1a1a;
+        font-size: 24px;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #666;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+        background: #f5f5f5;
+        color: #1a1a1a;
+    }
+    
+    .modal-body {
+        margin-bottom: 24px;
+    }
+    
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 2px solid #f0f0f0;
+    }
+    
+    .btn-modal {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modal-secondary {
+        background: #f3f4f6;
+        color: #666;
+    }
+    
+    .btn-modal-secondary:hover {
+        background: #e5e7eb;
+    }
+    
+    .modal-description-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 12px;
+    }
+    
+    .modal-info-row {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .modal-info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .modal-info-label {
+        display: block;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .modal-info-value {
+        font-size: 16px;
+        color: #1a1a1a;
+        line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .content-header h2 {
+            font-size: 24px;
+        }
+        
+        .stats-cards {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+        }
+        
+        .stat-card-value {
+            font-size: 24px;
+        }
+        
+        .filters-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-select {
+            width: 100%;
+        }
+        
+        .btn-filtrar {
+            width: 100%;
+        }
+        
+        .tickets-cards {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .content-header h2 {
+            font-size: 20px;
+        }
+        
+        .stats-cards {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-card {
+            padding: 12px;
+        }
+        
+        .stat-card-value {
+            font-size: 20px;
+        }
+        
+        .ticket-card-header-image {
+            height: 100px;
+        }
+        
+        .ticket-card-logo {
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Mis Tickets Asignados</h2>
+</div>
+
+<div class="stats-cards">
+    <div class="stat-card">
+        <div class="stat-card-title">Total Tickets</div>
+        <div class="stat-card-value">{{ total_tickets }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-title">Pendientes</div>
+        <div class="stat-card-value" style="color: #991b1b;">{{ pendientes }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-title">En Proceso</div>
+        <div class="stat-card-value" style="color: #92400e;">{{ en_proceso }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-title">Resueltos</div>
+        <div class="stat-card-value" style="color: #166534;">{{ resueltos }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-title">Cerrados</div>
+        <div class="stat-card-value" style="color: #3730a3;">{{ cerrados }}</div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="filters-container">
+    <form method="get" action="{% url 'ticket:tickets_asignados' %}" id="filterForm" style="display: contents;">
+        <div class="filter-group">
+            <label for="filtro_fecha">Fecha:</label>
+            <select name="fecha" id="filtro_fecha" class="filter-select">
+                <option value="hoy" {% if filtro_fecha == 'hoy' %}selected{% endif %}>Hoy</option>
+                <option value="semana" {% if filtro_fecha == 'semana' %}selected{% endif %}>Esta Semana</option>
+                <option value="mes" {% if filtro_fecha == 'mes' %}selected{% endif %}>Este Mes</option>
+                <option value="todos" {% if filtro_fecha == 'todos' %}selected{% endif %}>Todos</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="filtro_estado">Estado:</label>
+            <select name="estado" id="filtro_estado" class="filter-select">
+                <option value="">Todos</option>
+                <option value="pendiente" {% if filtro_estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                <option value="en_proceso" {% if filtro_estado == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+                <option value="resuelto" {% if filtro_estado == 'resuelto' %}selected{% endif %}>Resuelto</option>
+                <option value="cerrado" {% if filtro_estado == 'cerrado' %}selected{% endif %}>Cerrado</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="filtro_prioridad">Prioridad:</label>
+            <select name="prioridad" id="filtro_prioridad" class="filter-select">
+                <option value="">Todas</option>
+                <option value="baja" {% if filtro_prioridad == 'baja' %}selected{% endif %}>Baja</option>
+                <option value="media" {% if filtro_prioridad == 'media' %}selected{% endif %}>Media</option>
+                <option value="alta" {% if filtro_prioridad == 'alta' %}selected{% endif %}>Alta</option>
+                <option value="urgente" {% if filtro_prioridad == 'urgente' %}selected{% endif %}>Urgente</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn-filtrar">Filtrar</button>
+    </form>
+</div>
+
+<!-- Cards de Tickets -->
+<div class="tickets-cards">
+    {% for ticket in tickets %}
+    <div class="ticket-card" data-ticket-id="{{ ticket.id }}" onclick="openTicketDetails('{{ ticket.id }}')">
+        <div class="ticket-card-header-image gradient-{% cycle '1' '2' '3' '4' '5' '6' '7' '8' %}">
+            <div class="ticket-card-logo">
+                {% if ticket.sede %}
+                    {{ ticket.sede.nombre|first|upper }}
+                {% elif ticket.dependencia %}
+                    {{ ticket.dependencia.nombre|first|upper }}
+                {% else %}
+                    #
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="ticket-card-body">
+            <div class="ticket-card-id-section">
+                <div class="ticket-card-id">#{{ ticket.id }}</div>
+                <span class="status-badge status-{{ ticket.estado }}">
+                    {{ ticket.get_estado_display }}
+                </span>
+            </div>
+            
+            <div class="ticket-card-info">
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Usuario</div>
+                        <div class="ticket-card-info-value">{{ ticket.user.username|default:"-" }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Sede</div>
+                        <div class="ticket-card-info-value">{{ ticket.sede.nombre|default:"-" }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Dependencia</div>
+                        <div class="ticket-card-info-value">{{ ticket.dependencia.nombre|default:"-" }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Título</div>
+                        <div class="ticket-card-info-value" style="font-weight: 600;">{{ ticket.titulo|default:"Sin título"|truncatechars:40 }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Prioridad</div>
+                        <div class="ticket-card-info-value">
+                            <span class="prioridad-badge prioridad-{{ ticket.prioridad }}">
+                                {{ ticket.get_prioridad_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ticket-card-footer">
+            <div class="ticket-card-date">
+                Asignado: {% if ticket.fecha_asignacion %}{{ ticket.fecha_asignacion|date:"d/m/Y H:i" }}{% else %}-{% endif %}
+            </div>
+            <div class="ticket-card-date">
+                Creado: {{ ticket.created_at|date:"d/m/Y H:i" }}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #666; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 16px; opacity: 0.5;">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <h3 style="margin: 0 0 8px; font-size: 20px;">No tienes tickets asignados</h3>
+        <p style="margin: 0; font-size: 14px;">No hay tickets que coincidan con los filtros seleccionados.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal para Ver Detalles Completos del Ticket -->
+<div class="modal-overlay" id="modalTicketFullDetails">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Detalles del Ticket</h3>
+            <button class="modal-close" id="closeTicketFullDetailsModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info-row">
+                <label class="modal-info-label">ID:</label>
+                <div class="modal-info-value" id="modalFullDetailsId"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Usuario:</label>
+                <div class="modal-info-value" id="modalFullDetailsUsuario"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Sede:</label>
+                <div class="modal-info-value" id="modalFullDetailsSede"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Dependencia:</label>
+                <div class="modal-info-value" id="modalFullDetailsDependencia"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Categoría:</label>
+                <div class="modal-info-value" id="modalFullDetailsCategoria"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Subcategoría:</label>
+                <div class="modal-info-value" id="modalFullDetailsSubcategoria"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Estado:</label>
+                <div class="modal-info-value" id="modalFullDetailsEstado"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Prioridad:</label>
+                <div class="modal-info-value" id="modalFullDetailsPrioridad"></div>
+            </div>
+            <div class="modal-info-row">
+                <label class="modal-info-label">Título:</label>
+                <div class="modal-info-value" style="font-weight: 600; font-size: 18px;" id="modalFullDetailsTitulo"></div>
+            </div>
+            <div class="modal-info-row" style="border-bottom: none;">
+                <label class="modal-info-label">Descripción:</label>
+                <div class="modal-description-content" id="modalFullDetailsDescripcion"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-modal-secondary" id="closeTicketFullDetailsModalFooter">Cerrar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ tickets_data|json_script:"tickets-data" }}
+<script>
+// Datos de tickets para el modal
+const ticketsData = JSON.parse(document.getElementById('tickets-data').textContent);
+
+function openTicketDetails(ticketId) {
+    const ticket = ticketsData[ticketId];
+    if (!ticket) return;
+    
+    document.getElementById('modalFullDetailsId').textContent = '#' + ticket.id;
+    document.getElementById('modalFullDetailsUsuario').textContent = ticket.usuario;
+    document.getElementById('modalFullDetailsSede').textContent = ticket.sede;
+    document.getElementById('modalFullDetailsDependencia').textContent = ticket.dependencia;
+    document.getElementById('modalFullDetailsCategoria').textContent = ticket.categoria;
+    document.getElementById('modalFullDetailsSubcategoria').textContent = ticket.subcategoria;
+    document.getElementById('modalFullDetailsEstado').textContent = ticket.estado;
+    document.getElementById('modalFullDetailsPrioridad').textContent = ticket.prioridad;
+    document.getElementById('modalFullDetailsTitulo').textContent = ticket.titulo;
+    document.getElementById('modalFullDetailsDescripcion').textContent = ticket.descripcion;
+    
+    document.getElementById('modalTicketFullDetails').classList.add('active');
+}
+
+// Cerrar modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modalTicketFullDetails');
+    const closeBtn = document.getElementById('closeTicketFullDetailsModal');
+    const closeFooterBtn = document.getElementById('closeTicketFullDetailsModalFooter');
+    
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+    
+    closeBtn.addEventListener('click', closeModal);
+    closeFooterBtn.addEventListener('click', closeModal);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Auto-submit del formulario cuando cambian los select
+    const selects = document.querySelectorAll('.filter-select');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
+});
+</script>
+{% endblock %}

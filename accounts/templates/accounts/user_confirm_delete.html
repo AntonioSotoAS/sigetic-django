@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Usuario - SIGETIC{% endblock %}
+
+{% block content %}
+<div style="background: white; border-radius: 12px; padding: 32px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-bottom: 24px; color: #1a1a1a;">¿Eliminar Usuario?</h2>
+    <p style="margin-bottom: 24px; color: #666;">¿Estás seguro de que deseas eliminar el usuario "{{ user.nombre_completo }}"? Esta acción no se puede deshacer.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'accounts:list' %}" class="btn" style="background: #f3f4f6; color: #666; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Cancelar</a>
+            <button type="submit" class="btn" style="background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%); color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;">Eliminar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

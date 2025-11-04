@@ -1,0 +1,323 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Vincular Bot de Telegram - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bot-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .bot-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+    }
+    
+    .bot-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+    }
+    
+    .bot-status.vinculado {
+        background: #dcfce7;
+        border-left: 4px solid #10b981;
+    }
+    
+    .bot-status.no-vinculado {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .status-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .status-icon.vinculado {
+        background: #10b981;
+        color: white;
+    }
+    
+    .status-icon.no-vinculado {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .status-info {
+        flex: 1;
+    }
+    
+    .status-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .status-subtitle {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .instructions-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .instructions-title {
+        font-weight: 600;
+        color: #0c4a6e;
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+    
+    .instructions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .instructions-list li {
+        padding: 8px 0;
+        color: #075985;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .instructions-list li::before {
+        content: '✓';
+        color: #0ea5e9;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .dni-box {
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    
+    .dni-label {
+        font-size: 12px;
+        color: #92400e;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+    
+    .dni-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #78350f;
+        font-family: monospace;
+    }
+    
+    .btn-bot {
+        padding: 14px 32px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-vincular {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-vincular:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-desvincular {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .btn-desvincular:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 24px;
+    }
+    
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 24px;
+    }
+    
+    .info-box-title {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+    
+    .info-box-text {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bot-container">
+    <div class="content-header">
+        <h2>🤖 Vincular Bot de Telegram</h2>
+        <p>Conecta tu cuenta con el bot de Telegram para recibir notificaciones</p>
+    </div>
+    
+    <div class="bot-card">
+        <!-- Estado del Bot -->
+        <div class="bot-status {% if bot_vinculado %}vinculado{% else %}no-vinculado{% endif %}">
+            <div class="status-icon {% if bot_vinculado %}vinculado{% else %}no-vinculado{% endif %}">
+                {% if bot_vinculado %}
+                    ✓
+                {% else %}
+                    ✗
+                {% endif %}
+            </div>
+            <div class="status-info">
+                <div class="status-title">
+                    {% if bot_vinculado %}
+                        Bot Vinculado
+                    {% else %}
+                        Bot No Vinculado
+                    {% endif %}
+                </div>
+                <div class="status-subtitle">
+                    {% if bot_vinculado %}
+                        Chat ID: {{ telegram_chat_id }}
+                    {% else %}
+                        Tu bot no está vinculado actualmente
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if bot_vinculado %}
+            <!-- Botón para desvincular -->
+            <form method="post" action="{% url 'accounts:desvincular_bot' %}" style="text-align: center;">
+                {% csrf_token %}
+                <button type="submit" class="btn-bot btn-desvincular" onclick="return confirm('¿Estás seguro de desvincular el bot?');">
+                    🗑️ Desvincular Bot
+                </button>
+            </form>
+        {% else %}
+            <!-- Instrucciones para vincular -->
+            {% if dni %}
+                <div class="dni-box">
+                    <div class="dni-label">Tu DNI para vincular:</div>
+                    <div class="dni-value">{{ dni }}</div>
+                </div>
+                
+                <div class="instructions-box">
+                    <div class="instructions-title">📋 Instrucciones para vincular el bot:</div>
+                    <ol class="instructions-list">
+                        <li>Abre Telegram y busca el bot de SIGETIC</li>
+                        <li>Envía un mensaje al bot con tu DNI: <strong>{{ dni }}</strong></li>
+                        <li>Espera unos segundos y luego haz clic en el botón "Vincular Bot"</li>
+                        <li>¡Listo! Tu bot estará vinculado</li>
+                    </ol>
+                </div>
+                
+                <div class="btn-actions">
+                    <form method="post" action="{% url 'accounts:vincular_bot' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-bot btn-vincular">
+                            🔗 Vincular Bot
+                        </button>
+                    </form>
+                    <button type="button" class="btn-bot" onclick="obtenerChatId()" style="background: #f3f4f6; color: #666;">
+                        🔍 Buscar Chat ID
+                    </button>
+                </div>
+            {% else %}
+                <div class="instructions-box" style="background: #fee2e2; border-color: #ef4444;">
+                    <div class="instructions-title" style="color: #991b1b;">⚠️ DNI no registrado</div>
+                    <p style="color: #7f1d1d; margin: 0;">Debes tener un DNI registrado en tu perfil para poder vincular el bot. Contacta al administrador para agregar tu DNI.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+        
+        <div class="info-box">
+            <div class="info-box-title">ℹ️ Información</div>
+            <div class="info-box-text">
+                Una vez vinculado, recibirás notificaciones en Telegram sobre:
+                <ul style="margin-top: 8px; padding-left: 20px;">
+                    <li>Actualizaciones de tus tickets</li>
+                    <li>Asignación de técnicos</li>
+                    <li>Cambios de estado en tus solicitudes</li>
+                    <li>Notificaciones del grupo de tu sede</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function obtenerChatId() {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Buscando...';
+    
+    fetch('{% url "accounts:obtener_chat_id" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Chat ID encontrado: ' + data.chat_id + '\n\nAhora puedes vincular el bot.');
+        } else {
+            alert('⚠️ ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('❌ Error: ' + error);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+}
+</script>
+{% endblock %}
+

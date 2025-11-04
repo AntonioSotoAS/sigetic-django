@@ -1,0 +1,1413 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Crear Solicitud - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .ticket-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .welcome-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #c1121f;
+        margin-bottom: 12px;
+    }
+
+    .welcome-header p {
+        font-size: 16px;
+        color: #666;
+        margin: 0;
+    }
+
+    .progress-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 40px;
+        gap: 8px;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+        background: white;
+    }
+
+    .step-circle.active {
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+        border: 2px solid #c1121f;
+    }
+
+    .step-circle.inactive {
+        background: #e0e0e0;
+        color: #999;
+        border: 2px solid #e0e0e0;
+    }
+
+    .step-line {
+        height: 3px;
+        width: 100px;
+        background: #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .step-line.active {
+        background: linear-gradient(90deg, #c1121f 0%, #a1101a 100%);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+    }
+
+    .form-step {
+        display: none;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .form-step.active {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .step-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 12px;
+    }
+
+    .step-subtitle {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 45px 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+        font-family: inherit;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        pointer-events: none;
+    }
+
+    .clear-btn {
+        position: absolute;
+        right: 45px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 4px 8px;
+        transition: color 0.3s ease;
+    }
+
+    .clear-btn:hover {
+        color: #c1121f;
+    }
+
+    .info-box {
+        background: #e0f2fe;
+        border-left: 4px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 16px;
+    }
+
+    .info-box-title {
+        font-weight: 600;
+        color: #0c4a6e;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .info-box-text {
+        color: #075985;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .category-selection {
+        margin-bottom: 32px;
+    }
+
+    .category-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .category-option {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .category-option:hover {
+        border-color: #c1121f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.15);
+    }
+
+    .category-option.selected {
+        border-color: #c1121f;
+        background: #fef2f2;
+    }
+
+    .category-radio {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #c1121f;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .category-option.selected .category-radio {
+        background: #c1121f;
+    }
+
+    .category-radio::after {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: white;
+        display: none;
+    }
+
+    .category-option.selected .category-radio::after {
+        display: block;
+    }
+
+    .category-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-left: 32px;
+        margin-bottom: 8px;
+    }
+
+    .category-desc {
+        font-size: 14px;
+        color: #666;
+        margin-left: 32px;
+        margin-bottom: 8px;
+    }
+
+    .category-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #999;
+        margin-left: 32px;
+    }
+
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .selected-badge {
+        background: #f3e8ff;
+        border: 1px solid #a855f7;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #7c3aed;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .summary-card {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 24px;
+        margin-top: 24px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+    .summary-value {
+        color: #666;
+        text-align: right;
+        flex: 1;
+    }
+
+    .summary-value-badge {
+        display: inline-block;
+        background: #c1121f;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .summary-description {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .alert-box {
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alert-info {
+        background: #e0f2fe;
+        border-left: 4px solid #0ea5e9;
+        color: #075985;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        border-left: 4px solid #10b981;
+        color: #065f46;
+    }
+
+    .alert-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .alert-text {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .btn {
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #c1121f;
+        color: #c1121f;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.3);
+    }
+
+    .hidden {
+        display: none;
+    }
+    
+    #subcategoria-container {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    #subcategoria-container select.form-control,
+    #subcategoria-container select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+        font-family: inherit;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 12px;
+        padding-right: 40px;
+    }
+    
+    #subcategoria-container select.form-control:focus,
+    #subcategoria-container select:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+    
+    /* Select2 Custom Styles */
+    .select2-container--default .select2-selection--single {
+        height: 48px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 48px;
+        padding-left: 16px;
+        padding-right: 40px;
+        color: #333;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px;
+        right: 16px;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+    
+    .select2-dropdown {
+        border: 2px solid #c1121f;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.15);
+    }
+    
+    .select2-search--dropdown .select2-search__field {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 12px;
+    }
+    
+    .select2-search--dropdown .select2-search__field:focus {
+        border-color: #c1121f;
+        outline: none;
+    }
+    
+    .select2-results__option--highlighted {
+        background-color: #c1121f;
+    }
+    
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ticket-container">
+    <!-- Header de Bienvenida -->
+    <div class="welcome-header">
+        <h1>¡Indícanos tu problema!</h1>
+        <p>Rellena este formulario paso a paso y un técnico te atenderá muy pronto.</p>
+            </div>
+
+    <!-- Indicador de Progreso -->
+    <div class="progress-indicator">
+        <div class="progress-step">
+            <div class="step-circle active" data-step="1">1</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="progress-step">
+            <div class="step-circle inactive" data-step="2">2</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="progress-step">
+            <div class="step-circle inactive" data-step="3">3</div>
+        </div>
+    </div>
+
+    <form method="post" id="ticket-form">
+        {% csrf_token %}
+        
+        <!-- Paso 1: Ubicación y Departamento -->
+        <div class="form-card form-step active" data-step="1">
+            <h2 class="step-title">Ubicación y Departamento</h2>
+            <p class="step-subtitle">Selecciona tu sede y dependencia. Los valores se preseleccionan automáticamente según tu perfil, pero puedes cambiarlos.</p>
+            
+            <div class="form-group">
+                <label for="id_sede">{{ form.sede.label }}</label>
+                <div class="search-input-wrapper">
+                    {{ form.sede }}
+                    <button type="button" class="clear-btn" id="clear-sede" style="display: none;">×</button>
+                    </div>
+                {% if form.sede.errors %}
+                    <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.sede.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_dependencia">{{ form.dependencia.label }}</label>
+                <div class="search-input-wrapper">
+                    {{ form.dependencia }}
+                    <button type="button" class="clear-btn" id="clear-dependencia" style="display: none;">×</button>
+                </div>
+                {% if form.dependencia.errors %}
+                    <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.dependencia.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Selección automática editable</div>
+                <div class="info-box-text">
+                    Tu sede y dependencia se preseleccionan automáticamente según tu perfil. Puedes hacer clic en los campos para buscar y cambiar las selecciones. Usa el botón X para limpiar la selección.
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <div></div>
+                <button type="button" class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+            </div>
+        </div>
+
+        <!-- Paso 2: Categoría y Subcategoría -->
+        <div class="form-card form-step" data-step="2">
+            <h2 class="step-title">Categoría y Subcategoría</h2>
+            <p class="step-subtitle">Selecciona el tipo de problema</p>
+            
+            <div class="category-selection">
+                <label style="margin-bottom: 16px; display: block; font-weight: 500;">¿Qué tipo de ayuda necesitas?</label>
+                <p style="color: #666; margin-bottom: 24px; font-size: 14px;">Selecciona la categoría, subcategoría y prioridad de tu problema.</p>
+                
+                <div class="category-options" id="category-options">
+                    {% for categoria in categorias %}
+                    <div class="category-option" data-category-id="{{ categoria.id }}" data-categoria-nombre="{{ categoria.nombre }}">
+                        <div class="category-radio"></div>
+                        <div class="category-name">{{ categoria.nombre }}</div>
+                        <div class="category-desc">Soporte técnico especializado para {{ categoria.nombre|lower }}</div>
+                        <div class="category-badge">
+                            <span>✓</span>
+                            <span>Categoría de soporte</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {{ form.categoria }}
+                {% if form.categoria.errors %}
+                    <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.categoria.errors }}</div>
+                {% endif %}
+                <style>
+                    #id_categoria {
+                        display: none;
+                    }
+                </style>
+
+            </div>
+
+            <div id="selected-category-badge" class="selected-badge" style="display: none;">
+                <span>✓</span>
+                <span id="selected-category-text"></span>
+            </div>
+
+            <div class="form-group" id="subcategoria-container" style="display: none; margin-top: 24px;">
+                <label for="id_subcategoria" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Tipo de problema específico</label>
+                <p style="color: #666; margin-bottom: 12px; font-size: 14px;">Seleccione una subcategoría</p>
+                {{ form.subcategoria }}
+                {% if form.subcategoria.errors %}
+                    <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.subcategoria.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción detallada</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                    <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.descripcion.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="navigation-buttons">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">Anterior</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+            </div>
+        </div>
+
+        <!-- Paso 3: Resumen -->
+        <div class="form-card form-step" data-step="3">
+            <h2 class="step-title">Resumen</h2>
+            <p class="step-subtitle">Revisa y envía</p>
+            
+            <h3 style="font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px;">Resumen de tu solicitud</h3>
+            <p style="color: #666; margin-bottom: 24px;">Revisa la información antes de enviar tu solicitud de soporte.</p>
+
+            <div class="summary-card">
+                <div class="summary-item">
+                    <span class="summary-label">Sede</span>
+                    <span class="summary-value" id="summary-sede">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Dependencia</span>
+                    <span class="summary-value" id="summary-dependencia">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Categoría</span>
+                    <span class="summary-value">
+                        <span class="summary-value-badge" id="summary-categoria">-</span>
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Subcategoría</span>
+                    <span class="summary-value" id="summary-subcategoria">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Descripción</span>
+                    <div class="summary-value">
+                        <div class="summary-description" id="summary-descripcion">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-box alert-info">
+                <span class="alert-icon">ℹ️</span>
+                <div class="alert-text">
+                    ¿Todo se ve correcto? Una vez que envíes esta solicitud, se creará un ticket y un técnico se pondrá en contacto contigo a la brevedad.
+                </div>
+            </div>
+
+            <div class="alert-box alert-success">
+                <span class="alert-icon">✓</span>
+                <div class="alert-text">
+                    <strong>Ticket listo para enviar</strong> Todos los campos requeridos han sido completados
+                    </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button type="button" class="btn btn-secondary" onclick="prevStep()">Anterior</button>
+                <button type="submit" class="btn btn-primary">Enviar solicitud de soporte</button>
+            </div>
+        </div>
+        </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery (requerido para Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    // Verificar que jQuery se haya cargado correctamente
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery no se cargó correctamente');
+    } else {
+        console.log('jQuery cargado correctamente, versión:', jQuery.fn.jquery);
+    }
+    
+    // Verificar que Select2 se haya cargado correctamente
+    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 === 'undefined') {
+        console.error('Select2 no se cargó correctamente');
+    } else if (typeof jQuery !== 'undefined') {
+        console.log('Select2 cargado correctamente');
+    }
+let currentStep = 1;
+const totalSteps = 3;
+
+function updateProgress() {
+    // Actualizar círculos y líneas del indicador de progreso
+    const progressSteps = document.querySelectorAll('.progress-step');
+    
+    progressSteps.forEach((stepContainer, index) => {
+        const stepNumber = index + 1;
+        const circle = stepContainer.querySelector('.step-circle');
+        const line = stepContainer.querySelector('.step-line');
+        const step = document.querySelector(`.form-step[data-step="${stepNumber}"]`);
+        const prevButton = step?.querySelector('.btn-secondary');
+        
+        // Actualizar estado del círculo
+        if (stepNumber <= currentStep) {
+            circle?.classList.remove('inactive');
+            circle?.classList.add('active');
+        } else {
+            circle?.classList.remove('active');
+            circle?.classList.add('inactive');
+        }
+        
+        // Actualizar línea (solo si hay una línea en este contenedor)
+        if (line) {
+            if (stepNumber < currentStep) {
+                // La línea antes del paso actual debe estar activa si ya pasamos ese paso
+                line.classList.add('active');
+            } else {
+                line.classList.remove('active');
+            }
+        }
+        
+        // Actualizar visibilidad del paso del formulario
+        if (stepNumber === currentStep) {
+            step?.classList.add('active');
+            // Mostrar botón anterior si no es el primer paso
+            if (prevButton) {
+                prevButton.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+            }
+        } else {
+            step?.classList.remove('active');
+        }
+    });
+    
+    // Activar línea anterior al paso actual
+    if (currentStep > 1) {
+        const previousStepContainer = progressSteps[currentStep - 2];
+        const previousLine = previousStepContainer?.querySelector('.step-line');
+        if (previousLine) {
+            previousLine.classList.add('active');
+        }
+    }
+}
+
+function nextStep() {
+    // Validar campos antes de avanzar
+    if (currentStep === 1) {
+        // Validar paso 1: Sede y Dependencia son opcionales, pero deberíamos permitir avanzar
+        // No hay validación estricta aquí
+    } else if (currentStep === 2) {
+        // Validar paso 2: Categoría es obligatoria
+        const categoriaSelect = document.getElementById('id_categoria');
+        const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
+        
+        // Verificar si hay una categoría seleccionada (tanto en el select como en las cards)
+        const categoriaValue = categoriaSelect ? categoriaSelect.value : '';
+        const categoriaSeleccionada = document.querySelector('.category-option.selected');
+        
+        if (!categoriaValue && !categoriaSeleccionada) {
+            alert('Por favor, selecciona una categoría antes de continuar.');
+            return;
+        }
+        
+        // Si hay una card seleccionada pero el select no tiene valor, actualizarlo
+        if (categoriaSeleccionada && !categoriaValue) {
+            const categoryId = categoriaSeleccionada.getAttribute('data-category-id');
+            if (categoriaSelect) {
+                categoriaSelect.value = categoryId;
+            }
+        }
+        
+        // Verificar descripción
+        if (!descripcionTextarea) {
+            alert('Error: No se encontró el campo de descripción.');
+            console.error('Campo descripción no encontrado. Buscando por id: descripcion o id_descripcion');
+            return;
+        }
+        
+        const descripcionValue = descripcionTextarea.value ? descripcionTextarea.value.trim() : '';
+        
+        if (!descripcionValue || descripcionValue.length === 0) {
+            alert('Por favor, ingresa una descripción del problema antes de continuar.');
+            return;
+        }
+    }
+    
+    if (currentStep < totalSteps) {
+        // Ocultar paso actual
+        const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+        if (currentStepElement) {
+            currentStepElement.classList.remove('active');
+        }
+        
+        // Avanzar al siguiente paso
+        currentStep++;
+        
+        // Mostrar nuevo paso después de una pequeña pausa para la transición
+        setTimeout(() => {
+            updateProgress();
+            if (currentStep === totalSteps) {
+                // Actualizar resumen cuando llegamos al paso 3
+                setTimeout(() => {
+                    updateSummary();
+                }, 200);
+            }
+        }, 150);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        // Ocultar paso actual
+        const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+        if (currentStepElement) {
+            currentStepElement.classList.remove('active');
+        }
+        
+        // Retroceder al paso anterior
+        currentStep--;
+        
+        // Mostrar paso anterior después de una pequeña pausa para la transición
+        setTimeout(() => {
+            updateProgress();
+        }, 150);
+    }
+}
+
+function selectCategory(categoryId) {
+    // Convertir categoryId a string para asegurar que coincida
+    const categoryIdStr = String(categoryId);
+    
+    document.querySelectorAll('.category-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    const selectedOption = document.querySelector(`[data-category-id="${categoryId}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+        
+        // Actualizar el select oculto de categoría
+        const categoriaSelect = document.getElementById('id_categoria');
+        if (categoriaSelect) {
+            categoriaSelect.value = categoryIdStr;
+            // Disparar evento change para asegurar que se actualice
+            categoriaSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        const categoryName = selectedOption.querySelector('.category-name').textContent;
+        const badgeText = document.getElementById('selected-category-text');
+        const badge = document.getElementById('selected-category-badge');
+        if (badgeText) badgeText.textContent = `Categoría: ${categoryName}`;
+        if (badge) badge.style.display = 'flex';
+        
+        // Cargar subcategorías
+        loadSubcategorias(categoryId);
+        
+        // Actualizar resumen si estamos en el paso 3
+        if (currentStep === totalSteps) {
+            updateSummary();
+        }
+    }
+}
+
+function loadSubcategorias(categoriaId) {
+    console.log('loadSubcategorias llamado con categoriaId:', categoriaId);
+    
+    const subcategoryContainer = document.getElementById('subcategoria-container');
+    const select = document.getElementById('id_subcategoria');
+    
+    if (!subcategoryContainer) {
+        console.error('No se encontró el contenedor de subcategoría');
+        return;
+    }
+    
+    if (!select) {
+        console.error('No se encontró el select de subcategoría');
+        return;
+    }
+    
+    if (!categoriaId) {
+        subcategoryContainer.style.display = 'none';
+        return;
+    }   
+    
+    // Forzar visibilidad inmediata del contenedor
+    subcategoryContainer.style.display = 'block';
+    subcategoryContainer.style.visibility = 'visible';
+    subcategoryContainer.style.opacity = '1';
+    
+    // Mostrar un mensaje de carga
+    select.innerHTML = '<option value="">Cargando subcategorías...</option>';
+    select.disabled = true;
+    
+    // Destruir Select2 si ya está inicializado
+    if ($(select).hasClass('select2-hidden-accessible')) {
+        $(select).select2('destroy');
+    }
+    
+    const url = `{% url 'ticket:get_subcategorias' %}?categoria=${categoriaId}`;
+    console.log('Fetching subcategorías desde:', url);
+    
+    fetch(url)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos recibidos:', data);
+            
+            // Habilitar el select
+            select.disabled = false;
+            
+            // Limpiar opciones anteriores
+            select.innerHTML = '<option value="">Seleccione una subcategoría</option>';
+            
+            if (data && Array.isArray(data) && data.length > 0) {
+                console.log('Agregando', data.length, 'subcategorías');
+                // Agregar opciones al select
+                data.forEach(subcat => {
+                    const option = document.createElement('option');
+                    option.value = subcat.id;
+                    option.textContent = subcat.nombre;
+                    select.appendChild(option);
+                });
+                
+                // Forzar visibilidad del contenedor
+                subcategoryContainer.style.display = 'block';
+                subcategoryContainer.style.visibility = 'visible';
+                subcategoryContainer.style.opacity = '1';
+                
+                // Remover cualquier estilo inline que pueda estar ocultando
+                subcategoryContainer.removeAttribute('hidden');
+                
+                // Reinicializar Select2 con las nuevas opciones
+                $(select).select2({
+                    placeholder: 'Buscar y seleccionar subcategoría...',
+                    allowClear: true,
+                    language: {
+                        noResults: function() {
+                            return "No se encontraron resultados";
+                        },
+                        searching: function() {
+                            return "Buscando...";
+                        }
+                    }
+                }).on('change', function() {
+                    updateSummary();
+                    // Si estamos en el paso 3, actualizar resumen
+                    if (currentStep === totalSteps) {
+                        updateSummary();
+                    }
+                });
+                
+                console.log('Subcategorías cargadas. Contenedor display:', subcategoryContainer.style.display);
+                console.log('Subcategorías cargadas. Contenedor visible:', subcategoryContainer.offsetHeight > 0);
+                
+                // Preseleccionar subcategoría si hay una seleccionada previamente
+                const initialSubcategoria = select.getAttribute('data-initial-value');
+                if (initialSubcategoria) {
+                    $(select).val(initialSubcategoria).trigger('change');
+                }
+                
+                // Actualizar resumen si estamos en el paso 3
+                if (currentStep === totalSteps) {
+                    updateSummary();
+                }
+            } else {
+                console.log('No hay subcategorías para esta categoría');
+                // Mostrar mensaje si no hay subcategorías pero mantener visible
+                select.innerHTML = '<option value="">No hay subcategorías disponibles</option>';
+                subcategoryContainer.style.display = 'block';
+                subcategoryContainer.style.visibility = 'visible';
+                subcategoryContainer.style.opacity = '1';
+                
+                // Reinicializar Select2 incluso sin opciones
+                $(select).select2({
+                    placeholder: 'No hay subcategorías disponibles',
+                    allowClear: false,
+                    language: {
+                        noResults: function() {
+                            return "No hay subcategorías disponibles";
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar subcategorías:', error);
+            select.disabled = false;
+            select.innerHTML = '<option value="">Error al cargar subcategorías</option>';
+            subcategoryContainer.style.display = 'block';
+            subcategoryContainer.style.visibility = 'visible';
+            subcategoryContainer.style.opacity = '1';
+            
+            // Reinicializar Select2 incluso con error
+            $(select).select2({
+                placeholder: 'Error al cargar subcategorías',
+                allowClear: false
+            });
+        });
+}
+
+function loadDependencias(sedeId) {
+    const select = document.getElementById('id_dependencia');
+    const currentValue = select ? select.value : '';
+    
+    // Destruir Select2 si ya está inicializado
+    if (select && $(select).hasClass('select2-hidden-accessible')) {
+        $(select).select2('destroy');
+    }
+    
+    fetch(`{% url 'ticket:get_dependencias' %}?sede=${sedeId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Seleccione una dependencia</option>';
+            data.forEach(dep => {
+                const option = document.createElement('option');
+                option.value = dep.id;
+                option.textContent = dep.nombre;
+                if (dep.id == currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            // Reinicializar Select2 con las nuevas opciones
+            $(select).select2({
+                placeholder: 'Buscar y seleccionar dependencia...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            }).on('change', function() {
+                updateSummary();
+            });
+            
+            // Restaurar valor seleccionado si existe
+            if (currentValue) {
+                $(select).val(currentValue).trigger('change');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function updateSummary() {
+    // Obtener todos los campos del formulario
+    const sedeSelect = document.getElementById('id_sede') || document.getElementById('sede-select');
+    const dependenciaSelect = document.getElementById('id_dependencia') || document.getElementById('dependencia-select');
+    const categoriaSelect = document.getElementById('id_categoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria') || document.getElementById('subcategory-select');
+    const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
+    
+    // Actualizar Sede
+    let sedeText = 'No seleccionada';
+    if (sedeSelect) {
+        if ($(sedeSelect).hasClass('select2-hidden-accessible')) {
+            // Si usa Select2, obtener el texto de Select2
+            sedeText = $(sedeSelect).select2('data')[0]?.text || '';
+        } else if (sedeSelect.selectedIndex >= 0) {
+            // Si no usa Select2, obtener del select normal
+            sedeText = sedeSelect.options[sedeSelect.selectedIndex]?.text || '';
+        }
+    }
+    document.getElementById('summary-sede').textContent = sedeText || 'No seleccionada';
+    
+    // Actualizar Dependencia
+    let dependenciaText = 'No seleccionada';
+    if (dependenciaSelect) {
+        if ($(dependenciaSelect).hasClass('select2-hidden-accessible')) {
+            // Si usa Select2, obtener el texto de Select2
+            dependenciaText = $(dependenciaSelect).select2('data')[0]?.text || '';
+        } else if (dependenciaSelect.selectedIndex >= 0) {
+            // Si no usa Select2, obtener del select normal
+            dependenciaText = dependenciaSelect.options[dependenciaSelect.selectedIndex]?.text || '';
+        }
+    }
+    document.getElementById('summary-dependencia').textContent = dependenciaText || 'No seleccionada';
+    
+    // Actualizar Categoría
+    let categoriaName = '-';
+    // Intentar obtener de la card seleccionada primero
+    const categoriaSeleccionada = document.querySelector('.category-option.selected');
+    if (categoriaSeleccionada) {
+        categoriaName = categoriaSeleccionada.querySelector('.category-name')?.textContent || '-';
+    } else if (categoriaSelect && categoriaSelect.value) {
+        const categoriaOption = document.querySelector(`[data-category-id="${categoriaSelect.value}"]`);
+        if (categoriaOption) {
+            categoriaName = categoriaOption.querySelector('.category-name')?.textContent || '-';
+        }
+    }
+    
+    const summaryCategoria = document.getElementById('summary-categoria');
+    if (summaryCategoria) {
+        summaryCategoria.textContent = categoriaName;
+    }
+    
+    // Actualizar Subcategoría
+    let subcategoriaName = '-';
+    if (subcategoriaSelect && subcategoriaSelect.value) {
+        if ($(subcategoriaSelect).hasClass('select2-hidden-accessible')) {
+            // Si usa Select2, obtener el texto de Select2
+            const select2Data = $(subcategoriaSelect).select2('data');
+            subcategoriaName = select2Data && select2Data.length > 0 ? select2Data[0].text : '-';
+        } else if (subcategoriaSelect.selectedIndex >= 0) {
+            // Si no usa Select2, obtener del select normal
+            subcategoriaName = subcategoriaSelect.options[subcategoriaSelect.selectedIndex]?.text || '-';
+        }
+    }
+    document.getElementById('summary-subcategoria').textContent = subcategoriaName;
+    
+    // Actualizar Descripción
+    let descripcionText = '-';
+    if (descripcionTextarea && descripcionTextarea.value) {
+        descripcionText = descripcionTextarea.value.trim();
+    }
+    document.getElementById('summary-descripcion').textContent = descripcionText;
+}
+
+// Inicializar Select2 para autocomplete
+function initSelect2() {
+    // Verificar que jQuery y Select2 estén disponibles
+    if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+        console.error('jQuery o Select2 no están disponibles. Reintentando en 500ms...');
+        setTimeout(initSelect2, 500);
+        return;
+    }
+    
+    console.log('Inicializando Select2...');
+    
+    // Inicializar Select2 para Sede
+    const sedeSelect = document.getElementById('id_sede');
+    if (sedeSelect) {
+        // Destruir Select2 si ya está inicializado
+        if ($(sedeSelect).hasClass('select2-hidden-accessible')) {
+            $(sedeSelect).select2('destroy');
+        }
+        
+        try {
+            $(sedeSelect).select2({
+                placeholder: 'Buscar y seleccionar sede...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            }).on('change', function() {
+                updateSummary();
+                // Filtrar dependencias por sede
+                if (this.value) {
+                    loadDependencias(this.value);
+                } else {
+                    // Resetear dependencias si no hay sede
+                    const dependenciaSelect = document.getElementById('id_dependencia');
+                    if (dependenciaSelect) {
+                        dependenciaSelect.innerHTML = '<option value="">Seleccione una dependencia</option>';
+                        dependenciaSelect.value = '';
+                        if ($(dependenciaSelect).hasClass('select2-hidden-accessible')) {
+                            $(dependenciaSelect).select2('destroy');
+                            initSelect2();
+                        }
+                    }
+                }
+            });
+            console.log('Select2 inicializado para Sede');
+        } catch (error) {
+            console.error('Error al inicializar Select2 para Sede:', error);
+        }
+    } else {
+        console.warn('No se encontró el select de Sede');
+    }
+    
+    // Inicializar Select2 para Dependencia
+    const dependenciaSelect = document.getElementById('id_dependencia');
+    if (dependenciaSelect) {
+        // Destruir Select2 si ya está inicializado
+        if ($(dependenciaSelect).hasClass('select2-hidden-accessible')) {
+            $(dependenciaSelect).select2('destroy');
+        }
+        
+        try {
+            $(dependenciaSelect).select2({
+                placeholder: 'Buscar y seleccionar dependencia...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            }).on('change', function() {
+                updateSummary();
+            });
+            console.log('Select2 inicializado para Dependencia');
+        } catch (error) {
+            console.error('Error al inicializar Select2 para Dependencia:', error);
+        }
+    } else {
+        console.warn('No se encontró el select de Dependencia');
+    }
+    
+    // Inicializar Select2 para Subcategoría (si está visible)
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
+    if (subcategoriaSelect && subcategoriaSelect.offsetParent !== null) {
+        // Destruir Select2 si ya está inicializado
+        if ($(subcategoriaSelect).hasClass('select2-hidden-accessible')) {
+            $(subcategoriaSelect).select2('destroy');
+        }
+        
+        try {
+            $(subcategoriaSelect).select2({
+                placeholder: 'Buscar y seleccionar subcategoría...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            }).on('change', function() {
+                updateSummary();
+                // Si estamos en el paso 3, actualizar resumen
+                if (currentStep === totalSteps) {
+                    updateSummary();
+                }
+            });
+            console.log('Select2 inicializado para Subcategoría');
+        } catch (error) {
+            console.error('Error al inicializar Select2 para Subcategoría:', error);
+        }
+    }
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+    
+    // Función para inicializar Select2 cuando esté disponible
+    function waitForSelect2() {
+        if (typeof $ !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+            console.log('jQuery y Select2 están disponibles');
+            // Inicializar Select2 después de un pequeño delay para asegurar que el DOM esté listo
+            setTimeout(() => {
+                initSelect2();
+            }, 200);
+        } else {
+            console.log('Esperando jQuery y Select2...');
+            setTimeout(waitForSelect2, 100);
+        }
+    }
+    
+    // Comenzar a esperar por Select2
+    waitForSelect2();
+    
+    // Agregar event listeners a las opciones de categoría
+    document.querySelectorAll('.category-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const categoryId = parseInt(this.getAttribute('data-category-id'));
+            selectCategory(categoryId);
+        });
+    });
+    
+    // Agregar event listeners a las opciones de subcategoría (se agregarán dinámicamente)
+    
+    // Preseleccionar categoría si existe
+    const initialCategory = document.getElementById('id_categoria').value;
+    if (initialCategory) {
+        selectCategory(parseInt(initialCategory));
+    }
+    
+    // Cargar dependencias si hay una sede preseleccionada
+    const initialSede = document.getElementById('id_sede').value;
+    if (initialSede) {
+        loadDependencias(initialSede);
+    }
+    
+    // Manejar cambios en select de categoría
+    const categoriaSelect = document.getElementById('id_categoria');
+    if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', function() {
+            if (this.value) {
+                selectCategory(parseInt(this.value));
+            }
+        });
+    }
+    
+    // Actualizar resumen cuando cambian los campos
+    const sedeSelect = document.getElementById('id_sede');
+    const dependenciaSelect = document.getElementById('id_dependencia');
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
+    const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
+    
+    if (sedeSelect) {
+        sedeSelect.addEventListener('change', function() {
+            updateSummary();
+            // Filtrar dependencias por sede
+            if (this.value) {
+                loadDependencias(this.value);
+            } else {
+                // Resetear dependencias si no hay sede
+                if (dependenciaSelect) {
+                    dependenciaSelect.innerHTML = '<option value="">Seleccione una dependencia</option>';
+                    dependenciaSelect.value = '';
+                }
+            }
+        });
+    }
+    if (dependenciaSelect) dependenciaSelect.addEventListener('change', updateSummary);
+    if (subcategoriaSelect) {
+        subcategoriaSelect.addEventListener('change', function() {
+            updateSummary();
+            // Si estamos en el paso 3, actualizar resumen
+            if (currentStep === totalSteps) {
+                updateSummary();
+            }
+        });
+    }
+    if (descripcionTextarea) {
+        descripcionTextarea.addEventListener('input', function() {
+            // Actualizar resumen cuando se escribe en la descripción
+            if (currentStep === totalSteps) {
+                updateSummary();
+            }
+        });
+        }
+    });
+</script>
+{% endblock %}

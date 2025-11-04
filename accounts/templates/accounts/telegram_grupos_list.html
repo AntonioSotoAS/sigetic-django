@@ -1,0 +1,560 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Grupos de Telegram por Sede - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grupos-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .grupos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+    
+    .grupo-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .grupo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .grupo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .grupo-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+    
+    .grupo-subtitle {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .grupo-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-activo {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-inactivo {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .grupo-info {
+        margin-bottom: 20px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .info-icon {
+        width: 24px;
+        height: 24px;
+        color: #c1121f;
+        flex-shrink: 0;
+    }
+    
+    .info-label {
+        font-size: 12px;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 120px;
+    }
+    
+    .info-value {
+        font-size: 14px;
+        color: #1a1a1a;
+        font-family: monospace;
+        word-break: break-all;
+    }
+    
+    .grupo-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .create-form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 24px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    .info-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .info-box-title {
+        font-weight: 600;
+        color: #0c4a6e;
+        margin-bottom: 8px;
+    }
+    
+    .info-box-text {
+        color: #075985;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grupos-container">
+    <div class="content-header">
+        <h2>📱 Grupos de Telegram por Sede</h2>
+    </div>
+    
+    <div class="info-box">
+        <div class="info-box-title">ℹ️ ¿Cómo funcionan los grupos?</div>
+        <div class="info-box-text">
+            Cuando un usuario crea un ticket, se enviará automáticamente una notificación al grupo de Telegram de su sede.
+            Cada sede debe tener un grupo de Telegram configurado con su Chat ID. Los grupos se pueden crear desde aquí.
+        </div>
+    </div>
+    
+    <!-- Guía paso a paso -->
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h3 style="color: #1a1a1a; margin-bottom: 20px; font-size: 22px; font-weight: 700;">📖 Guía Paso a Paso</h3>
+        
+        <div style="display: grid; gap: 20px;">
+            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 8px; padding: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="width: 40px; height: 40px; background: #0ea5e9; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0;">1</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #0c4a6e; margin-bottom: 8px; font-size: 16px;">Crear el Grupo en Telegram</div>
+                        <div style="color: #075985; font-size: 14px; line-height: 1.6;">
+                            Abre Telegram y crea un grupo nuevo (o usa uno existente) para la sede. 
+                            Por ejemplo: "Sede Central - Notificaciones" o "Sede Casma - Tickets".
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 8px; padding: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="width: 40px; height: 40px; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0;">2</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #166534; margin-bottom: 8px; font-size: 16px;">Agregar el Bot @userinfobot</div>
+                        <div style="color: #065f46; font-size: 14px; line-height: 1.6;">
+                            En el grupo de Telegram, agrega el bot <strong>@userinfobot</strong>. 
+                            Este bot te ayudará a obtener el Chat ID del grupo.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="width: 40px; height: 40px; background: #f59e0b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0;">3</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 8px; font-size: 16px;">Obtener el Chat ID</div>
+                        <div style="color: #78350f; font-size: 14px; line-height: 1.6;">
+                            Envía cualquier mensaje en el grupo (ej: "test"). El bot @userinfobot responderá con información. 
+                            Busca el campo <strong>"Chat"</strong> o <strong>"ID"</strong> y copia el número (será negativo, ej: <code>-1001234567890</code>).
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="width: 40px; height: 40px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0;">4</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #991b1b; margin-bottom: 8px; font-size: 16px;">Configurar en SIGETIC</div>
+                        <div style="color: #7f1d1d; font-size: 14px; line-height: 1.6;">
+                            Aquí abajo, selecciona la sede y pega el Chat ID que copiaste. 
+                            Opcionalmente agrega un nombre para el grupo. Luego haz clic en "Crear Grupo".
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulario para crear grupo -->
+    <div class="create-form-card">
+        <h3 class="form-title">➕ Crear Nuevo Grupo</h3>
+        
+        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <div style="font-weight: 600; color: #92400e; margin-bottom: 8px; font-size: 14px;">🚀 Método Rápido:</div>
+            <div style="color: #78350f; font-size: 13px; line-height: 1.6;">
+                1. <strong>Crea un grupo en Telegram</strong> (ej: "Sede Central - Notificaciones")<br>
+                2. <strong>Agrega @userinfobot</strong> al grupo<br>
+                3. <strong>Envía un mensaje</strong> en el grupo (ej: "test")<br>
+                4. <strong>Copia el Chat ID</strong> que aparece en la respuesta del bot (número negativo como -1001234567890)<br>
+                5. <strong>Pega el Chat ID</strong> en el campo de abajo y selecciona la sede<br>
+                6. <strong>Haz clic en "Crear Grupo"</strong>
+            </div>
+        </div>
+        
+        <form method="post" action="{% url 'accounts:telegram_grupo_create' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="sede">Sede *</label>
+                <select name="sede" id="sede" class="form-control" required>
+                    <option value="">Seleccione una sede</option>
+                    {% for sede in sedes_sin_grupo %}
+                        <option value="{{ sede.id }}">{{ sede.nombre }}</option>
+                    {% endfor %}
+                </select>
+                {% if not sedes_sin_grupo %}
+                    <p style="color: #666; font-size: 14px; margin-top: 8px;">Todas las sedes ya tienen grupos configurados</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="grupo_chat_id">Chat ID del Grupo *</label>
+                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                    <input type="text" name="grupo_chat_id" id="grupo_chat_id" class="form-control" 
+                           placeholder="Ej: -1001234567890" required style="flex: 1;">
+                    <button type="button" onclick="obtenerGrupoChatId()" 
+                            style="padding: 12px 24px; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer; font-weight: 600; white-space: nowrap; transition: all 0.3s ease;">
+                        🔍 Buscar Grupos
+                    </button>
+                </div>
+                <div id="grupos-resultados" style="margin-bottom: 12px; display: none;"></div>
+                <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-top: 12px;">
+                    <div style="font-weight: 600; color: #0c4a6e; margin-bottom: 12px; font-size: 14px;">
+                        📋 ¿Cómo obtener el Chat ID del grupo?
+                    </div>
+                    <div style="color: #075985; font-size: 13px; line-height: 1.8;">
+                        <p style="margin: 0 0 12px; font-weight: 600;">Método 1: Usando @userinfobot (Recomendado)</p>
+                        <ol style="margin: 0 0 16px 0; padding-left: 20px;">
+                            <li>Agrega el bot <strong>@userinfobot</strong> al grupo de Telegram</li>
+                            <li>Envía cualquier mensaje en el grupo (puede ser un simple "test")</li>
+                            <li>El bot responderá con información del grupo</li>
+                            <li>Busca el campo <strong>"Chat"</strong> o <strong>"ID"</strong></li>
+                            <li>Copia el número (será negativo, ej: <code>-1001234567890</code>)</li>
+                        </ol>
+                        
+                        <p style="margin: 0 0 12px; font-weight: 600;">Método 2: Usando @RawDataBot</p>
+                        <ol style="margin: 0 0 16px 0; padding-left: 20px;">
+                            <li>Agrega el bot <strong>@RawDataBot</strong> al grupo</li>
+                            <li>Envía el comando <code>/start</code> en el grupo</li>
+                            <li>El bot te mostrará información en formato JSON</li>
+                            <li>Busca el campo <strong>"chat"</strong> → <strong>"id"</strong></li>
+                            <li>Copia el número (será negativo para grupos)</li>
+                        </ol>
+                        
+                        <p style="margin: 0 0 12px; font-weight: 600;">Método 3: Usando el botón "Buscar Grupos" (Automático)</p>
+                        <ol style="margin: 0 0 0 0; padding-left: 20px;">
+                            <li>Agrega tu bot de SIGETIC al grupo de Telegram</li>
+                            <li>Envía cualquier mensaje en el grupo (ej: "test")</li>
+                            <li>Haz clic en el botón <strong>"🔍 Buscar Grupos"</strong> de arriba</li>
+                            <li>Se mostrarán los grupos encontrados, haz clic en "Usar" para llenar automáticamente</li>
+                        </ol>
+                        
+                        <div style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 12px; margin-top: 16px; border-radius: 4px;">
+                            <p style="margin: 0; color: #92400e; font-size: 12px; font-weight: 600;">⚠️ Importante:</p>
+                            <p style="margin: 4px 0 0; color: #78350f; font-size: 12px;">
+                                El Chat ID de un grupo siempre será un número negativo (ej: <code>-1001234567890</code>). 
+                                Si obtienes un número positivo, es un chat individual, no un grupo.
+                            </p>
+                        </div>
+                        
+                        <div style="background: #e0f2fe; border-left: 3px solid #0ea5e9; padding: 12px; margin-top: 12px; border-radius: 4px;">
+                            <p style="margin: 0; color: #0c4a6e; font-size: 12px; font-weight: 600;">💡 Ejemplo visual:</p>
+                            <div style="color: #075985; font-size: 12px; margin-top: 8px; font-family: monospace; background: white; padding: 8px; border-radius: 4px;">
+                                Cuando @userinfobot responde, verás algo como:<br>
+                                <strong>Chat:</strong> -1001234567890<br>
+                                O simplemente: <strong>ID:</strong> -1001234567890
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nombre_grupo">Nombre del Grupo (opcional)</label>
+                <input type="text" name="nombre_grupo" id="nombre_grupo" class="form-control" 
+                       placeholder="Ej: Sede Central - Notificaciones">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Crear Grupo</button>
+        </form>
+    </div>
+    
+    <!-- Lista de grupos existentes -->
+    {% if grupos %}
+        <div class="grupos-grid">
+            {% for grupo in grupos %}
+            <div class="grupo-card">
+                <div class="grupo-header">
+                    <div>
+                        <div class="grupo-title">{{ grupo.sede.nombre }}</div>
+                        <div class="grupo-subtitle">
+                            {% if grupo.nombre_grupo %}
+                                {{ grupo.nombre_grupo }}
+                            {% else %}
+                                Grupo de Telegram
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="grupo-status {% if grupo.activo %}status-activo{% else %}status-inactivo{% endif %}">
+                        {% if grupo.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+                
+                <div class="grupo-info">
+                    <div class="info-item">
+                        <svg class="info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span class="info-label">Chat ID:</span>
+                        <span class="info-value">{{ grupo.grupo_chat_id }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <svg class="info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span class="info-label">Creado:</span>
+                        <span class="info-value">{{ grupo.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+                
+                <div class="grupo-actions">
+                    <form method="post" action="{% url 'accounts:telegram_grupo_delete' grupo.pk %}" 
+                          style="display: inline;" 
+                          onsubmit="return confirm('¿Estás seguro de eliminar este grupo?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">🗑️ Eliminar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📱</div>
+            <h3 style="margin: 0 0 8px; font-size: 20px;">No hay grupos configurados</h3>
+            <p style="margin: 0; font-size: 14px;">Crea un grupo para empezar a recibir notificaciones por sede</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function obtenerGrupoChatId() {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '🔍 Buscando...';
+    
+    const resultadosDiv = document.getElementById('grupos-resultados');
+    resultadosDiv.style.display = 'none';
+    resultadosDiv.innerHTML = '';
+    
+    fetch('{% url "accounts:obtener_grupo_chat_id" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.grupos && data.grupos.length > 0) {
+            // Mostrar grupos encontrados
+            let html = '<div style="background: #dcfce7; border-left: 4px solid #10b981; border-radius: 8px; padding: 16px; margin-top: 12px;">';
+            html += '<div style="font-weight: 600; color: #166534; margin-bottom: 12px;">✅ Grupos encontrados:</div>';
+            
+            data.grupos.forEach(grupo => {
+                html += `<div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">`;
+                html += `<div>`;
+                html += `<div style="font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">${grupo.nombre}</div>`;
+                html += `<div style="font-size: 12px; color: #666; font-family: monospace;">Chat ID: ${grupo.chat_id}</div>`;
+                html += `</div>`;
+                html += `<button type="button" onclick="usarChatId('${grupo.chat_id}', '${grupo.nombre.replace(/'/g, "\\'")}')" style="padding: 8px 16px; border-radius: 6px; background: #10b981; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 12px;">Usar</button>`;
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            resultadosDiv.innerHTML = html;
+            resultadosDiv.style.display = 'block';
+        } else {
+            // Mostrar mensaje de error o sin resultados
+            resultadosDiv.innerHTML = `
+                <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-top: 12px;">
+                    <div style="font-weight: 600; color: #991b1b; margin-bottom: 8px;">⚠️ ${data.message || 'No se encontraron grupos'}</div>
+                    <div style="font-size: 13px; color: #7f1d1d;">
+                        Asegúrate de que:<br>
+                        1. El bot esté agregado al grupo<br>
+                        2. Alguien haya enviado un mensaje recientemente en el grupo<br>
+                        3. El bot token esté configurado correctamente
+                    </div>
+                </div>
+            `;
+            resultadosDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        resultadosDiv.innerHTML = `
+            <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-top: 12px;">
+                <div style="font-weight: 600; color: #991b1b;">❌ Error: ${error}</div>
+            </div>
+        `;
+        resultadosDiv.style.display = 'block';
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+}
+
+function usarChatId(chatId, nombreGrupo) {
+    // Llenar el campo de Chat ID
+    document.getElementById('grupo_chat_id').value = chatId;
+    
+    // Si el campo de nombre está vacío, llenarlo con el nombre del grupo
+    const nombreInput = document.getElementById('nombre_grupo');
+    if (!nombreInput.value) {
+        nombreInput.value = nombreGrupo;
+    }
+    
+    // Ocultar resultados
+    document.getElementById('grupos-resultados').style.display = 'none';
+    
+    // Hacer scroll al campo para que el usuario vea que se llenó
+    document.getElementById('grupo_chat_id').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('grupo_chat_id').focus();
+}
+</script>
+{% endblock %}
+

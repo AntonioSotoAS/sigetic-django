@@ -1,0 +1,11 @@
+/* Estilos específicos para el login */
+
+.login-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Aquí puedes agregar estilos específicos para el login */
+/* Los estilos principales están en el template, pero puedes moverlos aquí si prefieres */
+
