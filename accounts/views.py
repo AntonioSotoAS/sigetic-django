@@ -224,6 +224,48 @@ def telegram_grupo_create(request):
 
 @login_required
 @user_passes_test(is_superuser)
+def telegram_grupo_edit(request, pk):
+    """Editar grupo de Telegram"""
+    from sede.models import Sede
+    grupo = get_object_or_404(TelegramGrupoSede, pk=pk)
+    
+    if request.method == 'POST':
+        sede_id = request.POST.get('sede')
+        grupo_chat_id = request.POST.get('grupo_chat_id')
+        nombre_grupo = request.POST.get('nombre_grupo', '')
+        
+        if not sede_id or not grupo_chat_id:
+            messages.error(request, 'Sede y Chat ID son requeridos.')
+            return redirect('accounts:telegram_grupos_list')
+        
+        sede = get_object_or_404(Sede, id=sede_id)
+        
+        # Verificar que la sede no tenga ya otro grupo (excepto el actual)
+        otro_grupo = TelegramGrupoSede.objects.filter(sede=sede).exclude(pk=grupo.pk).first()
+        if otro_grupo:
+            messages.error(request, f'La sede {sede.nombre} ya tiene otro grupo asignado.')
+            return redirect('accounts:telegram_grupos_list')
+        
+        # Actualizar grupo
+        grupo.sede = sede
+        grupo.grupo_chat_id = grupo_chat_id
+        grupo.nombre_grupo = nombre_grupo
+        grupo.save()
+        
+        messages.success(request, f'Grupo actualizado exitosamente para {sede.nombre}.')
+        return redirect('accounts:telegram_grupos_list')
+    
+    # Obtener todas las sedes para el formulario
+    sedes = Sede.objects.filter(activa=True).order_by('nombre')
+    
+    return render(request, 'accounts/telegram_grupo_edit.html', {
+        'grupo': grupo,
+        'sedes': sedes
+    })
+
+
+@login_required
+@user_passes_test(is_superuser)
 def telegram_grupo_delete(request, pk):
     """Eliminar grupo de Telegram"""
     grupo = get_object_or_404(TelegramGrupoSede, pk=pk)

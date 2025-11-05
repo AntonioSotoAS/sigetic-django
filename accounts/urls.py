@@ -17,6 +17,7 @@ urlpatterns = [
     # URLs para grupos de Telegram por sede
     path('telegram-grupos/', views.telegram_grupos_list, name='telegram_grupos_list'),
     path('telegram-grupos/create/', views.telegram_grupo_create, name='telegram_grupo_create'),
+    path('telegram-grupos/<int:pk>/edit/', views.telegram_grupo_edit, name='telegram_grupo_edit'),
     path('telegram-grupos/<int:pk>/delete/', views.telegram_grupo_delete, name='telegram_grupo_delete'),
     path('telegram-grupos/obtener-chat-id/', views.obtener_grupo_chat_id, name='obtener_grupo_chat_id'),
 ]

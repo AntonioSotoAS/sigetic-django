@@ -1,0 +1,291 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Editar Grupo de Telegram - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .edit-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 24px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+    
+    .btn-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #666;
+    }
+    
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+    
+    .info-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .info-box-title {
+        font-weight: 600;
+        color: #0c4a6e;
+        margin-bottom: 8px;
+    }
+    
+    .info-box-text {
+        color: #075985;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    .chat-id-helper {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .chat-id-helper input {
+        flex: 1;
+    }
+    
+    .btn-helper {
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-helper:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="content-header">
+        <h2>✏️ Editar Grupo de Telegram</h2>
+        <p>Modifica la configuración del grupo</p>
+    </div>
+    
+    <div class="edit-card">
+        <div class="info-box">
+            <div class="info-box-title">ℹ️ Información</div>
+            <div class="info-box-text">
+                Puedes cambiar la sede asignada, el Chat ID o el nombre del grupo. 
+                Asegúrate de que el nuevo Chat ID sea válido para evitar errores al enviar notificaciones.
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="sede">Sede *</label>
+                <select name="sede" id="sede" class="form-control" required>
+                    <option value="">Seleccione una sede</option>
+                    {% for sede in sedes %}
+                        <option value="{{ sede.id }}" {% if sede.id == grupo.sede.id %}selected{% endif %}>
+                            {{ sede.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="grupo_chat_id">Chat ID del Grupo *</label>
+                <div class="chat-id-helper">
+                    <input type="text" name="grupo_chat_id" id="grupo_chat_id" class="form-control" 
+                           value="{{ grupo.grupo_chat_id }}" 
+                           placeholder="Ej: -1001234567890" required>
+                    <button type="button" onclick="obtenerGrupoChatId()" class="btn-helper">
+                        🔍 Buscar Grupos
+                    </button>
+                </div>
+                <div id="grupos-resultados" style="margin-bottom: 12px; display: none;"></div>
+                <p style="color: #666; font-size: 12px; margin-top: 8px;">
+                    El Chat ID debe ser un número negativo (ej: -1001234567890). 
+                    Si el grupo fue migrado a supergroup, usa el nuevo Chat ID.
+                </p>
+            </div>
+            
+            <div class="form-group">
+                <label for="nombre_grupo">Nombre del Grupo (opcional)</label>
+                <input type="text" name="nombre_grupo" id="nombre_grupo" class="form-control" 
+                       value="{{ grupo.nombre_grupo|default:'' }}" 
+                       placeholder="Ej: Sede Casma - Notificaciones">
+            </div>
+            
+            <div class="btn-actions">
+                <a href="{% url 'accounts:telegram_grupos_list' %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    💾 Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function obtenerGrupoChatId() {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '🔍 Buscando...';
+    
+    const resultadosDiv = document.getElementById('grupos-resultados');
+    resultadosDiv.style.display = 'none';
+    resultadosDiv.innerHTML = '';
+    
+    fetch('{% url "accounts:obtener_grupo_chat_id" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.grupos && data.grupos.length > 0) {
+            let html = '<div style="background: #dcfce7; border-left: 4px solid #10b981; border-radius: 8px; padding: 16px; margin-top: 12px;">';
+            html += '<div style="font-weight: 600; color: #166534; margin-bottom: 12px;">✅ Grupos encontrados:</div>';
+            
+            data.grupos.forEach(grupo => {
+                html += `<div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">`;
+                html += `<div>`;
+                html += `<div style="font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">${grupo.nombre}</div>`;
+                html += `<div style="font-size: 12px; color: #666; font-family: monospace;">Chat ID: ${grupo.chat_id}</div>`;
+                html += `</div>`;
+                html += `<button type="button" onclick="usarChatId('${grupo.chat_id}', '${grupo.nombre.replace(/'/g, "\\'")}')" style="padding: 8px 16px; border-radius: 6px; background: #10b981; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 12px;">Usar</button>`;
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            resultadosDiv.innerHTML = html;
+            resultadosDiv.style.display = 'block';
+        } else {
+            resultadosDiv.innerHTML = `
+                <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-top: 12px;">
+                    <div style="font-weight: 600; color: #991b1b; margin-bottom: 8px;">⚠️ ${data.message || 'No se encontraron grupos'}</div>
+                    <div style="font-size: 13px; color: #7f1d1d;">
+                        Asegúrate de que:<br>
+                        1. El bot esté agregado al grupo<br>
+                        2. Alguien haya enviado un mensaje recientemente en el grupo<br>
+                        3. El bot token esté configurado correctamente
+                    </div>
+                </div>
+            `;
+            resultadosDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        resultadosDiv.innerHTML = `
+            <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-top: 12px;">
+                <div style="font-weight: 600; color: #991b1b;">❌ Error: ${error}</div>
+            </div>
+        `;
+        resultadosDiv.style.display = 'block';
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+}
+
+function usarChatId(chatId, nombreGrupo) {
+    document.getElementById('grupo_chat_id').value = chatId;
+    const nombreInput = document.getElementById('nombre_grupo');
+    if (!nombreInput.value) {
+        nombreInput.value = nombreGrupo;
+    }
+    document.getElementById('grupos-resultados').style.display = 'none';
+    document.getElementById('grupo_chat_id').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('grupo_chat_id').focus();
+}
+</script>
+{% endblock %}
+
