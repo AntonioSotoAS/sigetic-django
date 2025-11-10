@@ -28,9 +28,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@fiphxo9r=82i*spzf1$g*kk($m2n_c%5*6#07h@zyo))$z*@c')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS: Lista de hosts/dominios permitidos
+# Puedes configurarlo desde .env separando por comas: ALLOWED_HOSTS=dominio1.com,dominio2.com
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS', '')
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
+else:
+    # Si no está configurado en .env, usar el dominio del servidor
+    ALLOWED_HOSTS = [
+        'soporteti.cortedelsanta.com',
+        'localhost',
+        '127.0.0.1',
+    ]
 
 
 # Application definition
