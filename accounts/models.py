@@ -3,6 +3,40 @@ from django.db import models
 from sede.models import Sede
 from cargo.models import Cargo
 from dependencia.models import Dependencia
+import os
+
+def user_profile_photo_path(instance, filename):
+    """Genera la ruta de subida para las fotos de perfil: media/fotoperfil/username/filename"""
+    # Obtener el username del usuario
+    username = None
+    
+    # Intentar obtener el username de diferentes formas
+    if instance and hasattr(instance, 'username'):
+        if instance.username:
+            username = instance.username
+        # Si el usuario no tiene username pero tiene ID, obtenerlo de la BD
+        elif instance.id:
+            try:
+                # Usar get_user_model para evitar importación circular
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                user_obj = User.objects.get(id=instance.id)
+                username = user_obj.username
+            except:
+                pass
+    
+    # Si aún no tenemos username, usar 'sin_usuario'
+    if not username:
+        username = 'sin_usuario'
+    
+    # Limpiar el username para que sea seguro para usar en rutas de archivos
+    # Reemplazar caracteres no permitidos
+    import re
+    username = re.sub(r'[^\w\-_\.]', '_', username)
+    
+    # Retornar la ruta: media/fotoperfil/username/filename
+    path = f'fotoperfil/{username}/{filename}'
+    return path
 
 class User(AbstractUser):
     """Modelo de usuario personalizado con campos adicionales"""
@@ -67,7 +101,7 @@ class User(AbstractUser):
     )
     
     foto_perfil = models.ImageField(
-        upload_to='profiles/',
+        upload_to=user_profile_photo_path,
         blank=True,
         null=True,
         verbose_name='Foto de Perfil'

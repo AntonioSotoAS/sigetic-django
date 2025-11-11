@@ -11,7 +11,7 @@ class TicketForm(forms.ModelForm):
         queryset=Sede.objects.filter(activa=True),
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'id': 'sede-select'
+            'id': 'id_sede'
         }),
         label='Sede / Ubicación',
         required=False,
@@ -22,7 +22,7 @@ class TicketForm(forms.ModelForm):
         queryset=Dependencia.objects.filter(activo=True),
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'id': 'dependencia-select'
+            'id': 'id_dependencia'
         }),
         label='Dependencia / Departamento',
         required=False,
@@ -33,7 +33,7 @@ class TicketForm(forms.ModelForm):
         queryset=Categoria.objects.filter(activo=True),
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'id': 'category-select'
+            'id': 'id_categoria'
         }),
         label='Categoría *',
         required=True,
@@ -44,7 +44,7 @@ class TicketForm(forms.ModelForm):
         queryset=Subcategoria.objects.none(),  # Se actualizará dinámicamente
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'id': 'subcategory-select'
+            'id': 'id_subcategoria'
         }),
         label='Subcategoría',
         required=False,
@@ -66,7 +66,7 @@ class TicketForm(forms.ModelForm):
         choices=Ticket.PRIORIDAD_CHOICES,
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'id': 'prioridad-select'
+            'id': 'id_prioridad'
         }),
         label='Prioridad',
         required=False,

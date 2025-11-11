@@ -159,3 +159,76 @@ class UserCreateForm(UserForm):
         label='Confirmar Contraseña *',
         required=True
     )
+
+class ProfileForm(forms.ModelForm):
+    """Formulario para editar el perfil del usuario"""
+    
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nueva contraseña (dejar vacío para no cambiar)'
+        }),
+        label='Nueva Contraseña',
+        required=False,
+        help_text='Deja este campo vacío si no deseas cambiar tu contraseña'
+    )
+    
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirmar nueva contraseña'
+        }),
+        label='Confirmar Nueva Contraseña',
+        required=False
+    )
+    
+    class Meta:
+        model = User
+        fields = ['foto_perfil', 'sede', 'cargo']
+        widgets = {
+            'foto_perfil': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'sede': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'cargo': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'foto_perfil': 'Foto de Perfil',
+            'sede': 'Sede',
+            'cargo': 'Cargo',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar solo sedes activas
+        from sede.models import Sede
+        from cargo.models import Cargo
+        self.fields['sede'].queryset = Sede.objects.filter(activa=True)
+        self.fields['cargo'].queryset = Cargo.objects.filter(activo=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password or password_confirm:
+            if password != password_confirm:
+                raise forms.ValidationError('Las contraseñas no coinciden.')
+            if len(password) < 8:
+                raise forms.ValidationError('La contraseña debe tener al menos 8 caracteres.')
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user

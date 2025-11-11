@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.hashers import make_password
 from .models import User, TelegramGrupoSede
-from .forms import UserForm, UserCreateForm
+from .forms import UserForm, UserCreateForm, ProfileForm
 from .telegram_utils import (
     get_api_base, get_last_chat_id, send_text, 
     get_chat_info, delete_webhook, get_updates
@@ -755,3 +755,28 @@ def user_download_template(request):
             content_type='text/plain',
             status=500
         )
+
+@login_required
+def profile(request):
+    """Vista para editar el perfil del usuario"""
+    user = request.user
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            # Asegurar que el usuario tenga username antes de guardar la foto
+            if not user.username:
+                user.save()  # Guardar primero para obtener username
+            
+            form.save()
+            messages.success(request, 'Tu perfil ha sido actualizado exitosamente.')
+            return redirect('accounts:profile')
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
+    else:
+        form = ProfileForm(instance=user)
+    
+    return render(request, 'accounts/profile.html', {
+        'form': form,
+        'user': user
+    })

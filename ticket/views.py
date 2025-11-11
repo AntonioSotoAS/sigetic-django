@@ -26,6 +26,162 @@ def create_ticket(request):
             ticket.titulo = form.cleaned_data.get('descripcion', '')[:100]  # Primeros 100 caracteres como título
             ticket.save()
             
+            # Guardar imágenes si hay alguna
+            from .models import TicketImage
+            import os
+            from django.conf import settings
+            from django.core.files.storage import default_storage
+            from django.core.files.base import ContentFile
+            
+            print("=" * 80)
+            print("🔍 INICIANDO PROCESO DE GUARDADO DE IMÁGENES")
+            print("=" * 80)
+            
+            imagenes = request.FILES.getlist('imagenes')
+            urls_imagenes = []
+            print(f"📸 Número de imágenes recibidas: {len(imagenes)}")
+            
+            if len(imagenes) == 0:
+                print("⚠️ No hay imágenes para guardar")
+            else:
+                print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
+                print(f"📁 MEDIA_URL: {settings.MEDIA_URL}")
+                print(f"📁 ¿MEDIA_ROOT existe?: {os.path.exists(settings.MEDIA_ROOT)}")
+                
+                # Asegurar que el ticket tenga un ID
+                print(f"🔍 Verificando ID del ticket...")
+                print(f"   - Ticket ID actual: {ticket.id}")
+                if not ticket.id:
+                    print("   ⚠️ El ticket no tiene ID, guardando primero...")
+                    ticket.save()
+                    print(f"   ✅ Ticket guardado con ID: {ticket.id}")
+                else:
+                    print(f"   ✅ Ticket ya tiene ID: {ticket.id}")
+                
+                ticket_id = ticket.id
+                print(f"   ✅ Usando Ticket ID: {ticket_id}")
+                
+                for idx, imagen in enumerate(imagenes, 1):
+                    print(f"\n{'=' * 80}")
+                    print(f"📷 PROCESANDO IMAGEN {idx}/{len(imagenes)}")
+                    print(f"{'=' * 80}")
+                    print(f"   - Nombre: {imagen.name}")
+                    print(f"   - Tamaño: {imagen.size} bytes")
+                    print(f"   - Tipo: {imagen.content_type}")
+                    
+                    try:
+                        # Generar un nombre único para el archivo
+                        import uuid
+                        file_extension = os.path.splitext(imagen.name)[1] or '.jpg'
+                        unique_filename = f"{uuid.uuid4()}{file_extension}"
+                        upload_path = f'tickets/{ticket_id}/imagenes/{unique_filename}'
+                        
+                        print(f"\n📁 PASO 1: Generando ruta")
+                        print(f"   - Ruta relativa: {upload_path}")
+                        
+                        # Crear la ruta completa
+                        full_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+                        print(f"   - Ruta completa: {full_path}")
+                        
+                        # Crear las carpetas si no existen
+                        print(f"\n📁 PASO 2: Creando carpetas")
+                        dir_path = os.path.dirname(full_path)
+                        print(f"   - Directorio a crear: {dir_path}")
+                        print(f"   - ¿Directorio existe?: {os.path.exists(dir_path)}")
+                        
+                        try:
+                            os.makedirs(dir_path, exist_ok=True)
+                            print(f"   ✅ Carpetas creadas/verificadas: {dir_path}")
+                            print(f"   - ¿Directorio existe ahora?: {os.path.exists(dir_path)}")
+                        except Exception as e:
+                            print(f"   ❌ ERROR al crear carpetas: {str(e)}")
+                            raise
+                        
+                        # Guardar el archivo manualmente
+                        print(f"\n💾 PASO 3: Guardando archivo en disco")
+                        print(f"   - Ruta destino: {full_path}")
+                        
+                        try:
+                            with open(full_path, 'wb+') as destination:
+                                chunk_count = 0
+                                for chunk in imagen.chunks():
+                                    destination.write(chunk)
+                                    chunk_count += 1
+                                print(f"   ✅ Archivo escrito ({chunk_count} chunks)")
+                        except Exception as e:
+                            print(f"   ❌ ERROR al escribir archivo: {str(e)}")
+                            raise
+                        
+                        # Verificar que el archivo se guardó
+                        print(f"\n✅ PASO 4: Verificando archivo guardado")
+                        if os.path.exists(full_path):
+                            file_size = os.path.getsize(full_path)
+                            print(f"   ✅ Archivo existe en: {full_path}")
+                            print(f"   ✅ Tamaño del archivo: {file_size} bytes")
+                            if file_size == 0:
+                                print(f"   ⚠️ ADVERTENCIA: El archivo está vacío (0 bytes)")
+                        else:
+                            print(f"   ❌ ERROR: El archivo NO existe en: {full_path}")
+                            raise Exception(f"El archivo no se guardó correctamente en {full_path}")
+                        
+                        # Crear el objeto TicketImage con la ruta guardada
+                        print(f"\n💾 PASO 5: Guardando registro en base de datos")
+                        try:
+                            ticket_image = TicketImage(ticket=ticket)
+                            print(f"   - TicketImage creado (sin guardar aún)")
+                            print(f"   - Ticket asignado: {ticket_image.ticket.id}")
+                            
+                            # Asignar la ruta relativa al campo imagen
+                            ticket_image.imagen.name = upload_path
+                            print(f"   - Ruta asignada al campo imagen: {ticket_image.imagen.name}")
+                            
+                            ticket_image.save()
+                            print(f"   ✅ TicketImage guardado en BD con ID: {ticket_image.id}")
+                        except Exception as e:
+                            print(f"   ❌ ERROR al guardar TicketImage en BD: {str(e)}")
+                            import traceback
+                            traceback.print_exc()
+                            raise
+                        
+                        # Obtener la URL de la imagen
+                        print(f"\n🌐 PASO 6: Obteniendo URL de la imagen")
+                        try:
+                            image_url = ticket_image.imagen.url
+                            print(f"   ✅ URL de imagen: {image_url}")
+                            urls_imagenes.append(image_url)
+                            print(f"   ✅ URL agregada a la lista (total: {len(urls_imagenes)})")
+                        except Exception as e:
+                            print(f"   ❌ ERROR al obtener URL: {str(e)}")
+                            raise
+                        
+                        print(f"\n✅ IMAGEN {idx} PROCESADA EXITOSAMENTE")
+                        
+                    except Exception as e:
+                        print(f"\n❌ ERROR AL PROCESAR IMAGEN {idx}")
+                        print(f"   - Error: {str(e)}")
+                        import traceback
+                        print("   - Traceback completo:")
+                        traceback.print_exc()
+                        print(f"\n{'=' * 80}\n")
+            
+            # Guardar las URLs en el campo imagenes_urls del ticket
+            print(f"\n{'=' * 80}")
+            print(f"💾 GUARDANDO URLs EN EL TICKET")
+            print(f"{'=' * 80}")
+            print(f"   - URLs obtenidas: {len(urls_imagenes)}")
+            if urls_imagenes:
+                for idx, url in enumerate(urls_imagenes, 1):
+                    print(f"   {idx}. {url}")
+                ticket.imagenes_urls = urls_imagenes
+                ticket.save(update_fields=['imagenes_urls'])
+                print(f"   ✅ URLs guardadas en ticket.imagenes_urls")
+            else:
+                print(f"   ⚠️ No hay URLs para guardar")
+            
+            print(f"\n{'=' * 80}")
+            print(f"✅ PROCESO DE GUARDADO DE IMÁGENES COMPLETADO")
+            print(f"{'=' * 80}\n")
+            
             # Enviar notificación al grupo de Telegram de la sede del ticket
             try:
                 from accounts.telegram_utils import send_ticket_notification
@@ -42,6 +198,12 @@ def create_ticket(request):
             
             messages.success(request, '¡Tu solicitud ha sido enviada correctamente!')
             return redirect('ticket:create_ticket')
+        else:
+            # Si el formulario no es válido, mostrar los errores
+            print("❌ Errores del formulario:", form.errors)
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = TicketForm(user=request.user)
     
@@ -76,6 +238,20 @@ def get_dependencias(request):
     return JsonResponse([], safe=False)
 
 @login_required
+def get_sedes(request):
+    """Vista API para obtener sedes con búsqueda"""
+    from sede.models import Sede
+    search = request.GET.get('search', '').strip()
+    sedes = Sede.objects.filter(activa=True)
+    
+    if search:
+        sedes = sedes.filter(nombre__icontains=search)
+    
+    sedes = sedes.order_by('nombre')[:50]  # Limitar a 50 resultados
+    data = [{'id': sede.id, 'nombre': sede.nombre} for sede in sedes]
+    return JsonResponse(data, safe=False)
+
+@login_required
 @user_passes_test(is_superuser)
 def ticket_admin_list(request):
     """Vista para listar todos los tickets en el admin"""
@@ -98,8 +274,16 @@ def ticket_admin_list(request):
     resueltos = tickets.filter(estado='resuelto').count()
     cerrados = tickets.filter(estado='cerrado').count()
     
+    # Preparar datos de tickets con URLs de imágenes para el template
+    import json
+    tickets_data = {}
+    for ticket in tickets:
+        imagenes_urls = ticket.get_imagenes_urls() if hasattr(ticket, 'get_imagenes_urls') else []
+        tickets_data[str(ticket.id)] = imagenes_urls  # Mantener como lista para JSON
+    
     context = {
         'tickets': tickets,
+        'tickets_imagenes': json.dumps(tickets_data),  # Convertir todo el diccionario a JSON string
         'tecnicos_disponibles': tecnicos_disponibles,
         'total_tickets': total_tickets,
         'pendientes': pendientes,
@@ -297,6 +481,9 @@ def ticket_admin_list_api(request):
     # Serializar tickets
     tickets_data = []
     for ticket in tickets:
+        # Obtener URLs de imágenes
+        imagenes_urls = ticket.get_imagenes_urls() if hasattr(ticket, 'get_imagenes_urls') else []
+        
         tickets_data.append({
             'id': ticket.id,
             'usuario': ticket.user.username if ticket.user else 'Sin usuario',
@@ -314,6 +501,7 @@ def ticket_admin_list_api(request):
             'tecnico_nombre': (ticket.tecnico.nombre_completo or ticket.tecnico.username) if ticket.tecnico else None,
             'fecha_creacion': ticket.created_at.isoformat() if ticket.created_at else None,
             'fecha_asignacion': ticket.fecha_asignacion.isoformat() if ticket.fecha_asignacion else None,
+            'imagenes_urls': imagenes_urls,
         })
     
     return JsonResponse({
@@ -393,6 +581,9 @@ def tickets_asignados_api(request):
     # Serializar tickets
     tickets_data = []
     for ticket in tickets:
+        # Obtener URLs de imágenes
+        imagenes_urls = ticket.get_imagenes_urls() if hasattr(ticket, 'get_imagenes_urls') else []
+        
         tickets_data.append({
             'id': ticket.id,
             'usuario': ticket.user.username if ticket.user else 'Sin usuario',
@@ -408,6 +599,7 @@ def tickets_asignados_api(request):
             'prioridad_display': ticket.get_prioridad_display(),
             'fecha_creacion': ticket.created_at.isoformat() if ticket.created_at else None,
             'fecha_asignacion': ticket.fecha_asignacion.isoformat() if ticket.fecha_asignacion else None,
+            'imagenes_urls': imagenes_urls,
         })
     
     return JsonResponse({
@@ -469,6 +661,9 @@ def mis_tickets(request):
     # Preparar datos de tickets para JavaScript de forma segura
     tickets_data = {}
     for ticket in tickets:
+        # Obtener URLs de imágenes
+        imagenes_urls = ticket.get_imagenes_urls() if hasattr(ticket, 'get_imagenes_urls') else []
+        
         tickets_data[str(ticket.id)] = {
             'id': ticket.id,
             'usuario': ticket.user.username if ticket.user else 'Sin usuario',
@@ -481,6 +676,7 @@ def mis_tickets(request):
             'titulo': ticket.titulo or 'Sin título',
             'descripcion': ticket.descripcion or 'Sin descripción',
             'tecnico': ticket.tecnico.nombre_completo if ticket.tecnico and hasattr(ticket.tecnico, 'nombre_completo') else (ticket.tecnico.username if ticket.tecnico else 'Sin técnico asignado'),
+            'imagenes_urls': imagenes_urls,
         }
     
     context = {

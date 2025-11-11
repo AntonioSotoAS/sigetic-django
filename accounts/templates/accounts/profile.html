@@ -1,0 +1,450 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - SIGETIC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #c1121f;
+        margin: 0 auto 20px;
+        display: block;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-avatar-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 60px;
+        font-weight: 700;
+        border: 4px solid #c1121f;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .profile-username {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
+    .profile-role {
+        display: inline-block;
+        padding: 6px 16px;
+        background: #f3f4f6;
+        color: #666;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+    }
+
+    .form-section {
+        margin-bottom: 32px;
+        padding-bottom: 32px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-section-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        border-radius: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #c1121f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.1);
+    }
+
+    .form-control[type="file"] {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .form-control[type="file"]::-webkit-file-upload-button {
+        padding: 8px 16px;
+        background: #c1121f;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 12px;
+    }
+
+    .form-control[type="file"]::-webkit-file-upload-button:hover {
+        background: #a1101a;
+    }
+
+    .help-text {
+        font-size: 13px;
+        color: #666;
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn {
+        padding: 12px 32px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #c1121f 0%, #a1101a 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #666;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .alert-box {
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        border-left: 4px solid #10b981;
+        color: #065f46;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+    }
+
+    .alert-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .alert-text {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .photo-preview {
+        margin-top: 12px;
+        display: none;
+    }
+
+    .photo-preview img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #c1121f;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .photo-preview.show {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0 16px;
+        }
+
+        .form-container {
+            padding: 24px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Header del Perfil -->
+    <div class="profile-header">
+        {% if user.foto_perfil %}
+            <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil" class="profile-avatar" id="current-avatar">
+        {% else %}
+            <div class="profile-avatar-placeholder" id="current-avatar-placeholder">
+                {{ user.first_name|first|default:user.username|first|upper }}
+            </div>
+        {% endif %}
+        <div class="profile-name">{{ user.nombre_completo }}</div>
+        <div class="profile-username">@{{ user.username }}</div>
+        <div class="profile-role">{{ user.get_rol_display|default:user.rol }}</div>
+    </div>
+
+    <!-- Mostrar mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert-box {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% endif %}">
+                <span class="alert-icon">{% if message.tags == 'error' %}❌{% elif message.tags == 'success' %}✓{% endif %}</span>
+                <div class="alert-text">{{ message }}</div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulario -->
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data" id="profile-form">
+            {% csrf_token %}
+            
+            <!-- Mostrar errores del formulario -->
+            {% if form.errors %}
+                <div class="alert-box alert-error" style="margin-bottom: 24px;">
+                    <span class="alert-icon">❌</span>
+                    <div class="alert-text">
+                        <strong>Por favor, corrige los siguientes errores:</strong>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Sección: Foto de Perfil -->
+            <div class="form-section">
+                <div class="form-section-title">📷 Foto de Perfil</div>
+                
+                <div class="form-group">
+                    <label for="{{ form.foto_perfil.id_for_label }}">{{ form.foto_perfil.label }}</label>
+                    {{ form.foto_perfil }}
+                    {% if form.foto_perfil.help_text %}
+                        <div class="help-text">{{ form.foto_perfil.help_text }}</div>
+                    {% endif %}
+                    {% if form.foto_perfil.errors %}
+                        <div style="color: #ef4444; font-size: 14px; margin-top: 8px;">{{ form.foto_perfil.errors }}</div>
+                    {% endif %}
+                    
+                    <div class="photo-preview" id="photo-preview">
+                        <img id="preview-image" src="" alt="Vista previa">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Información Laboral -->
+            <div class="form-section">
+                <div class="form-section-title">💼 Información Laboral</div>
+                
+                <div class="form-group">
+                    <label for="{{ form.sede.id_for_label }}">{{ form.sede.label }}</label>
+                    {{ form.sede }}
+                    {% if form.sede.help_text %}
+                        <div class="help-text">{{ form.sede.help_text }}</div>
+                    {% endif %}
+                    {% if form.sede.errors %}
+                        <div style="color: #ef4444; font-size: 14px; margin-top: 8px;">{{ form.sede.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.cargo.id_for_label }}">{{ form.cargo.label }}</label>
+                    {{ form.cargo }}
+                    {% if form.cargo.help_text %}
+                        <div class="help-text">{{ form.cargo.help_text }}</div>
+                    {% endif %}
+                    {% if form.cargo.errors %}
+                        <div style="color: #ef4444; font-size: 14px; margin-top: 8px;">{{ form.cargo.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sección: Cambiar Contraseña -->
+            <div class="form-section">
+                <div class="form-section-title">🔒 Cambiar Contraseña</div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                    {{ form.password }}
+                    {% if form.password.help_text %}
+                        <div class="help-text">{{ form.password.help_text }}</div>
+                    {% endif %}
+                    {% if form.password.errors %}
+                        <div style="color: #ef4444; font-size: 14px; margin-top: 8px;">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password_confirm.id_for_label }}">{{ form.password_confirm.label }}</label>
+                    {{ form.password_confirm }}
+                    {% if form.password_confirm.help_text %}
+                        <div class="help-text">{{ form.password_confirm.help_text }}</div>
+                    {% endif %}
+                    {% if form.password_confirm.errors %}
+                        <div style="color: #ef4444; font-size: 14px; margin-top: 8px;">{{ form.password_confirm.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vista previa de foto de perfil
+    const fotoInput = document.getElementById('{{ form.foto_perfil.id_for_label }}');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImage = document.getElementById('preview-image');
+    const currentAvatar = document.getElementById('current-avatar');
+    const currentAvatarPlaceholder = document.getElementById('current-avatar-placeholder');
+
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    photoPreview.classList.add('show');
+                    
+                    // Actualizar también el avatar del header
+                    if (currentAvatar) {
+                        currentAvatar.src = e.target.result;
+                    } else if (currentAvatarPlaceholder) {
+                        currentAvatarPlaceholder.style.display = 'none';
+                        if (!currentAvatar) {
+                            const newAvatar = document.createElement('img');
+                            newAvatar.src = e.target.result;
+                            newAvatar.alt = 'Foto de perfil';
+                            newAvatar.className = 'profile-avatar';
+                            newAvatar.id = 'current-avatar';
+                            currentAvatarPlaceholder.parentNode.insertBefore(newAvatar, currentAvatarPlaceholder);
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                photoPreview.classList.remove('show');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+

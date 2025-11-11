@@ -242,6 +242,25 @@
             font-weight: 600;
             margin-right: 12px;
             font-size: 16px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .user-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+        
+        .user-avatar-initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         .user-info {
@@ -599,7 +618,11 @@
             
             <div class="user-profile" onclick="toggleUserMenu()">
                 <div class="user-avatar">
-                    {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|default:""|upper }}
+                    {% if user.foto_perfil %}
+                        <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil" class="user-avatar-img">
+                    {% else %}
+                        <span class="user-avatar-initials">{{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|default:""|upper }}</span>
+                    {% endif %}
                 </div>
                 <div class="user-info">
                     <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
@@ -618,14 +641,14 @@
                     </div>
                     <span>{% if user.bot_vinculado %}🤖 Bot Vinculado{% else %}🤖 Vincular Bot{% endif %}</span>
                 </a>
-                <a href="#" class="user-menu-item">
+                <a href="{% url 'accounts:profile' %}" class="user-menu-item">
                     <div class="user-menu-item-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </div>
-                    <span>Configuración de Cuenta</span>
+                    <span>Mi Perfil</span>
                 </a>
                 <a href="{% url 'login:logout' %}" class="user-menu-item">
                     <div class="user-menu-item-icon">

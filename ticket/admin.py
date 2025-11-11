@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ticket
+from .models import Ticket, TicketImage
 
 
 class TicketAdmin(admin.ModelAdmin):
@@ -31,4 +31,13 @@ class TicketAdmin(admin.ModelAdmin):
         return True
 
 
+class TicketImageAdmin(admin.ModelAdmin):
+    """Admin para TicketImage"""
+    list_display = ('ticket', 'imagen', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('ticket__titulo',)
+    readonly_fields = ('created_at',)
+
+
 admin.site.register(Ticket, TicketAdmin)
+admin.site.register(TicketImage, TicketImageAdmin)

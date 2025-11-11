@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from categoria.models import Categoria, Subcategoria
 from dependencia.models import Dependencia
 from sede.models import Sede
@@ -138,6 +139,13 @@ class Ticket(models.Model):
         verbose_name='Fecha de Eliminación'
     )
     
+    imagenes_urls = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='URLs de Imágenes',
+        help_text='Lista de URLs de las imágenes adjuntas al ticket'
+    )
+    
     class Meta:
         verbose_name = 'Ticket'
         verbose_name_plural = 'Tickets'
@@ -145,3 +153,96 @@ class Ticket(models.Model):
     
     def __str__(self):
         return f"{self.titulo or 'Sin título'} - {self.user.username if self.user else 'Sin usuario'}"
+    
+    def actualizar_imagenes_urls(self):
+        """Actualiza el campo imagenes_urls con las URLs actuales de las imágenes"""
+        urls = []
+        for imagen_obj in self.imagenes.all():
+            if imagen_obj.imagen:
+                # Construir la URL completa de la imagen
+                url = imagen_obj.imagen.url
+                urls.append(url)
+        self.imagenes_urls = urls
+        self.save(update_fields=['imagenes_urls'])
+        return urls
+    
+    def get_imagenes_urls(self):
+        """Retorna una lista con las URLs de todas las imágenes del ticket"""
+        # Si el campo está vacío o desactualizado, actualizarlo
+        if not self.imagenes_urls:
+            return self.actualizar_imagenes_urls()
+        return self.imagenes_urls or []
+
+
+def ticket_image_upload_path(instance, filename):
+    """Genera la ruta de subida para las imágenes de tickets: media/tickets/idticket/imagenes/"""
+    # Obtener el ID del ticket
+    # Intentar obtener el ID de diferentes formas
+    ticket_id = None
+    
+    # Primero intentar desde instance.ticket.id (si el ticket ya está guardado)
+    if instance and hasattr(instance, 'ticket'):
+        if instance.ticket and hasattr(instance.ticket, 'id') and instance.ticket.id:
+            ticket_id = instance.ticket.id
+        # Si el ticket no tiene ID pero tenemos el objeto, intentar guardarlo
+        elif instance.ticket and not instance.ticket.id:
+            try:
+                instance.ticket.save()
+                ticket_id = instance.ticket.id
+            except:
+                pass
+    
+    # Si no funcionó, intentar desde ticket_id (ForeignKey)
+    if not ticket_id and hasattr(instance, 'ticket_id') and instance.ticket_id:
+        ticket_id = instance.ticket_id
+    
+    # Si aún no tenemos ID, usar 'sin_ticket'
+    if not ticket_id:
+        ticket_id = 'sin_ticket'
+        print(f"⚠️ No se pudo obtener el ID del ticket, usando 'sin_ticket'")
+    
+    # Retornar la ruta: media/tickets/idticket/imagenes/filename
+    path = f'tickets/{ticket_id}/imagenes/{filename}'
+    print(f"📁 Ruta de imagen generada: {path} (ticket_id: {ticket_id})")
+    return path
+
+
+class TicketImage(models.Model):
+    """Modelo para almacenar imágenes adjuntas a los tickets"""
+    
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name='imagenes',
+        verbose_name='Ticket'
+    )
+    
+    imagen = models.ImageField(
+        upload_to=ticket_image_upload_path,
+        verbose_name='Imagen'
+    )
+    
+    def save(self, *args, **kwargs):
+        # Asegurar que el ticket tenga un ID antes de guardar
+        # Esto es crítico porque upload_to necesita el ticket.id
+        if self.ticket:
+            if not self.ticket.id:
+                print(f"   🔄 Guardando ticket primero para obtener ID...")
+                self.ticket.save()
+                print(f"   ✅ Ticket guardado con ID: {self.ticket.id}")
+            else:
+                print(f"   ✅ Ticket ya tiene ID: {self.ticket.id}")
+        super().save(*args, **kwargs)
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de Creación'
+    )
+    
+    class Meta:
+        verbose_name = 'Imagen de Ticket'
+        verbose_name_plural = 'Imágenes de Tickets'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Imagen de {self.ticket.titulo or 'Ticket'} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

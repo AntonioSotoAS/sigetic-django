@@ -246,12 +246,78 @@
         transition: all 0.2s ease;
         padding: 8px;
         border-radius: 6px;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .usuario-clickable:hover {
         background: #f5f5f5;
         color: #c1121f;
+    }
+    
+    .usuario-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    .usuario-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+    
+    .usuario-avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .ticket-user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 12px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    .ticket-user-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+    
+    .ticket-user-avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
     }
     
     .modal-description-content {
@@ -264,6 +330,42 @@
         background: #f8f9fa;
         border-radius: 8px;
         margin-top: 12px;
+    }
+    
+    .modal-images-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 12px;
+    }
+    
+    .modal-image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .modal-image-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .modal-image-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .modal-image-item.empty {
+        padding: 40px;
+        text-align: center;
+        color: #999;
+        background: #f8f9fa;
+        font-style: italic;
     }
     
     .modal-info-row {
@@ -803,7 +905,16 @@
                           data-ticket-sede="{{ ticket.sede.nombre|default:'Sin sede' }}"
                           data-ticket-dependencia="{{ ticket.dependencia.nombre|default:'Sin dependencia' }}"
                           data-ticket-titulo="{{ ticket.titulo|default:'Sin título' }}"
-                          data-ticket-descripcion="{{ ticket.descripcion|default:'Sin descripción' }}">
+                          data-ticket-descripcion="{{ ticket.descripcion|default:'Sin descripción' }}"
+                          data-ticket-id="{{ ticket.id }}"
+                          data-ticket-imagenes-urls='[]'>
+                        <div class="usuario-avatar">
+                            {% if ticket.user.foto_perfil %}
+                                <img src="{{ ticket.user.foto_perfil.url }}" alt="Foto de perfil" class="usuario-avatar-img">
+                            {% else %}
+                                <span class="usuario-avatar-initials">{{ ticket.user.first_name|first|default:ticket.user.username|first|upper }}{{ ticket.user.last_name|first|default:""|upper }}</span>
+                            {% endif %}
+                        </div>
                         {{ ticket.user.username|default:"-" }}
                     </span>
                 </td>
@@ -877,7 +988,16 @@
         
         <div class="ticket-card-row">
             <span class="ticket-card-label">Usuario:</span>
-            <span class="ticket-card-value">{{ ticket.user.username|default:"-" }}</span>
+            <span class="ticket-card-value" style="display: flex; align-items: center; gap: 8px;">
+                <div class="usuario-avatar">
+                    {% if ticket.user.foto_perfil %}
+                        <img src="{{ ticket.user.foto_perfil.url }}" alt="Foto de perfil" class="usuario-avatar-img">
+                    {% else %}
+                        <span class="usuario-avatar-initials">{{ ticket.user.first_name|first|default:ticket.user.username|first|upper }}{{ ticket.user.last_name|first|default:""|upper }}</span>
+                    {% endif %}
+                </div>
+                {{ ticket.user.username|default:"-" }}
+            </span>
         </div>
         
         <div class="ticket-card-row">
@@ -1046,9 +1166,13 @@
                 <label class="modal-info-label">Título:</label>
                 <div class="modal-info-value" style="font-weight: 600; font-size: 18px;" id="modalFullDetailsTitulo"></div>
             </div>
-            <div class="modal-info-row" style="border-bottom: none;">
+            <div class="modal-info-row">
                 <label class="modal-info-label">Descripción:</label>
                 <div class="modal-description-content" id="modalFullDetailsDescripcion"></div>
+            </div>
+            <div class="modal-info-row" style="border-bottom: none;">
+                <label class="modal-info-label">Imágenes:</label>
+                <div class="modal-images-container" id="modalFullDetailsImagenes"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -1059,6 +1183,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+// Pasar datos de imágenes de tickets al JavaScript
+window.ticketsImagenesData = {{ tickets_imagenes|safe }};
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Variables globales para el modal
@@ -1252,7 +1380,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalFullDetailsDependencia = document.getElementById('modalFullDetailsDependencia');
     const modalFullDetailsTitulo = document.getElementById('modalFullDetailsTitulo');
     const modalFullDetailsDescripcion = document.getElementById('modalFullDetailsDescripcion');
+    const modalFullDetailsImagenes = document.getElementById('modalFullDetailsImagenes');
     const usuarioDetailsTriggers = document.querySelectorAll('.usuario-details-trigger');
+    
+    // Función para mostrar imágenes en el modal
+    function mostrarImagenes(imagenesUrls) {
+        modalFullDetailsImagenes.innerHTML = '';
+        
+        if (!imagenesUrls || imagenesUrls.length === 0) {
+            modalFullDetailsImagenes.innerHTML = '<div class="modal-image-item empty">No hay imágenes adjuntas</div>';
+            return;
+        }
+        
+        // Parsear las URLs si vienen como string JSON
+        let urls = imagenesUrls;
+        if (typeof imagenesUrls === 'string') {
+            try {
+                urls = JSON.parse(imagenesUrls);
+            } catch (e) {
+                console.error('Error al parsear URLs de imágenes:', e);
+                urls = [];
+            }
+        }
+        
+        urls.forEach(function(url) {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'modal-image-item';
+            imageItem.innerHTML = `<img src="${url}" alt="Imagen del ticket" onclick="window.open('${url}', '_blank')">`;
+            modalFullDetailsImagenes.appendChild(imageItem);
+        });
+    }
     
     // Abrir modal de detalles completos al hacer clic en Usuario
     usuarioDetailsTriggers.forEach(function(trigger) {
@@ -1262,12 +1419,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const dependencia = this.getAttribute('data-ticket-dependencia');
             const titulo = this.getAttribute('data-ticket-titulo');
             const descripcion = this.getAttribute('data-ticket-descripcion');
+            const ticketId = this.getAttribute('data-ticket-id');
             
             modalFullDetailsUsuario.textContent = usuario || 'Sin usuario';
             modalFullDetailsSede.textContent = sede || 'Sin sede';
             modalFullDetailsDependencia.textContent = dependencia || 'Sin dependencia';
             modalFullDetailsTitulo.textContent = titulo || 'Sin título';
             modalFullDetailsDescripcion.textContent = descripcion || 'Sin descripción';
+            
+            // Obtener URLs de imágenes desde el objeto global
+            let imagenesUrls = [];
+            if (typeof window.ticketsImagenesData !== 'undefined' && ticketId && window.ticketsImagenesData[ticketId]) {
+                try {
+                    imagenesUrls = typeof window.ticketsImagenesData[ticketId] === 'string' 
+                        ? JSON.parse(window.ticketsImagenesData[ticketId]) 
+                        : window.ticketsImagenesData[ticketId];
+                } catch (e) {
+                    console.error('Error al parsear URLs de imágenes:', e);
+                    imagenesUrls = [];
+                }
+            }
+            
+            // Mostrar imágenes
+            mostrarImagenes(imagenesUrls);
             
             modalTicketFullDetails.classList.add('active');
         });

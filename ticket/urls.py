@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/', views.ticket_admin_list, name='ticket_admin_list'),
     path('api/subcategorias/', views.get_subcategorias, name='get_subcategorias'),
     path('api/dependencias/', views.get_dependencias, name='get_dependencias'),
+    path('api/sedes/', views.get_sedes, name='get_sedes'),
     path('admin/<int:ticket_id>/asignar-tecnico/', views.asignar_tecnico, name='asignar_tecnico'),
     path('api/admin/list/', views.ticket_admin_list_api, name='ticket_admin_list_api'),
     path('api/asignados/', views.tickets_asignados_api, name='tickets_asignados_api'),

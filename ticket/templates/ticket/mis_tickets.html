@@ -172,6 +172,42 @@
         z-index: 1;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
+    
+    .ticket-card-user-avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        font-weight: 700;
+        color: white;
+        z-index: 1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .ticket-card-user-avatar-large-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+    
+    .ticket-card-user-avatar-large-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(225, 29, 72, 0.8) 0%, rgba(193, 18, 31, 0.8) 100%);
+    }
 
     .ticket-card-body {
         padding: 20px;
@@ -245,6 +281,38 @@
         color: #c1121f;
         flex-shrink: 0;
         margin-top: 2px;
+    }
+    
+    .ticket-user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 12px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    .ticket-user-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+    
+    .ticket-user-avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
     }
 
     .ticket-card-info-content {
@@ -463,6 +531,42 @@
         color: #1a1a1a;
         line-height: 1.6;
     }
+    
+    .modal-images-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 12px;
+    }
+    
+    .modal-image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .modal-image-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .modal-image-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .modal-image-item.empty {
+        padding: 40px;
+        text-align: center;
+        color: #999;
+        background: #f8f9fa;
+        border: 2px dashed #e0e0e0;
+    }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -605,13 +709,11 @@
     {% for ticket in tickets %}
     <div class="ticket-card" data-ticket-id="{{ ticket.id }}" onclick="openTicketDetails('{{ ticket.id }}')">
         <div class="ticket-card-header-image gradient-{% cycle '1' '2' '3' '4' '5' '6' '7' '8' %}">
-            <div class="ticket-card-logo">
-                {% if ticket.sede %}
-                    {{ ticket.sede.nombre|first|upper }}
-                {% elif ticket.dependencia %}
-                    {{ ticket.dependencia.nombre|first|upper }}
+            <div class="ticket-card-user-avatar-large">
+                {% if ticket.user.foto_perfil %}
+                    <img src="{{ ticket.user.foto_perfil.url }}" alt="Foto de perfil" class="ticket-card-user-avatar-large-img">
                 {% else %}
-                    #
+                    <span class="ticket-card-user-avatar-large-initials">{{ ticket.user.first_name|first|default:ticket.user.username|first|upper }}{{ ticket.user.last_name|first|default:""|upper }}</span>
                 {% endif %}
             </div>
         </div>
@@ -625,6 +727,48 @@
             </div>
             
             <div class="ticket-card-info">
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Usuario</div>
+                        <div class="ticket-card-info-value">{{ ticket.user.username|default:"-" }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Dependencia</div>
+                        <div class="ticket-card-info-value">{{ ticket.dependencia.nombre|default:"-" }}</div>
+                    </div>
+                </div>
+                
+                <div class="ticket-card-info-item">
+                    <div class="ticket-card-info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="ticket-card-info-content">
+                        <div class="ticket-card-info-label">Cargo</div>
+                        <div class="ticket-card-info-value">{{ ticket.user.cargo.nombre|default:"-" }}</div>
+                    </div>
+                </div>
+                
                 <div class="ticket-card-info-item">
                     <div class="ticket-card-info-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -660,20 +804,6 @@
                     <div class="ticket-card-info-content">
                         <div class="ticket-card-info-label">Sede</div>
                         <div class="ticket-card-info-value">{{ ticket.sede.nombre|default:"-" }}</div>
-                    </div>
-                </div>
-                
-                <div class="ticket-card-info-item">
-                    <div class="ticket-card-info-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                            <polyline points="7 3 7 8 15 8"></polyline>
-                        </svg>
-                    </div>
-                    <div class="ticket-card-info-content">
-                        <div class="ticket-card-info-label">Dependencia</div>
-                        <div class="ticket-card-info-value">{{ ticket.dependencia.nombre|default:"-" }}</div>
                     </div>
                 </div>
                 
@@ -780,9 +910,13 @@
                 <label class="modal-info-label">Título:</label>
                 <div class="modal-info-value" style="font-weight: 600; font-size: 18px;" id="modalFullDetailsTitulo"></div>
             </div>
-            <div class="modal-info-row" style="border-bottom: none;">
+            <div class="modal-info-row">
                 <label class="modal-info-label">Descripción:</label>
                 <div class="modal-description-content" id="modalFullDetailsDescripcion"></div>
+            </div>
+            <div class="modal-info-row" style="border-bottom: none;">
+                <label class="modal-info-label">Imágenes:</label>
+                <div class="modal-images-container" id="modalFullDetailsImagenes"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -812,6 +946,35 @@ function openTicketDetails(ticketId) {
     document.getElementById('modalFullDetailsPrioridad').textContent = ticket.prioridad;
     document.getElementById('modalFullDetailsTitulo').textContent = ticket.titulo;
     document.getElementById('modalFullDetailsDescripcion').textContent = ticket.descripcion;
+    
+    // Mostrar imágenes
+    const modalFullDetailsImagenes = document.getElementById('modalFullDetailsImagenes');
+    if (modalFullDetailsImagenes) {
+        modalFullDetailsImagenes.innerHTML = '';
+        
+        let imagenesUrls = ticket.imagenes_urls || [];
+        
+        // Parsear las URLs si vienen como string JSON
+        if (typeof imagenesUrls === 'string') {
+            try {
+                imagenesUrls = JSON.parse(imagenesUrls);
+            } catch (e) {
+                console.error('Error al parsear URLs de imágenes:', e);
+                imagenesUrls = [];
+            }
+        }
+        
+        if (!imagenesUrls || imagenesUrls.length === 0) {
+            modalFullDetailsImagenes.innerHTML = '<div class="modal-image-item empty">No hay imágenes adjuntas</div>';
+        } else {
+            imagenesUrls.forEach(function(url) {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'modal-image-item';
+                imageItem.innerHTML = `<img src="${url}" alt="Imagen del ticket" onclick="window.open('${url}', '_blank')">`;
+                modalFullDetailsImagenes.appendChild(imageItem);
+            });
+        }
+    }
     
     document.getElementById('modalTicketFullDetails').classList.add('active');
 }

@@ -202,93 +202,6 @@
         line-height: 1.6;
     }
 
-    .category-selection {
-        margin-bottom: 32px;
-    }
-
-    .category-options {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    .category-option {
-        background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .category-option:hover {
-        border-color: #c1121f;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.15);
-    }
-
-    .category-option.selected {
-        border-color: #c1121f;
-        background: #fef2f2;
-    }
-
-    .category-radio {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #c1121f;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .category-option.selected .category-radio {
-        background: #c1121f;
-    }
-
-    .category-radio::after {
-        content: '';
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: white;
-        display: none;
-    }
-
-    .category-option.selected .category-radio::after {
-        display: block;
-    }
-
-    .category-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-left: 32px;
-        margin-bottom: 8px;
-    }
-
-    .category-desc {
-        font-size: 14px;
-        color: #666;
-        margin-left: 32px;
-        margin-bottom: 8px;
-    }
-
-    .category-badge {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: #999;
-        margin-left: 32px;
-    }
-
-
     .form-control {
         width: 100%;
         padding: 12px 16px;
@@ -311,19 +224,199 @@
         resize: vertical;
         min-height: 120px;
     }
-
-    .selected-badge {
-        background: #f3e8ff;
-        border: 1px solid #a855f7;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-top: 16px;
+    
+    /* Estilos para el contenedor de descripción con micrófono */
+    .descripcion-wrapper {
+        position: relative;
+    }
+    
+    .descripcion-wrapper textarea {
+        padding-right: 60px;
+    }
+    
+    .mic-button {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        background: #c1121f;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 18px;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(193, 18, 31, 0.3);
+        pointer-events: auto;
+    }
+    
+    .mic-button:hover {
+        background: #a1101a;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.4);
+    }
+    
+    .mic-button.recording {
+        background: #dc2626;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    .mic-button.recording::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(220, 38, 38, 0.4);
+        animation: ripple 1.5s ease-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+    
+    .mic-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .speech-status {
+        position: absolute;
+        right: 60px;
+        bottom: 16px;
+        font-size: 12px;
+        color: #666;
+        display: none;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .speech-status.active {
+        display: flex;
+    }
+    
+    .speech-status.recording {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .speech-status .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: blink 1s ease-in-out infinite;
+    }
+    
+    @keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    /* Estilos para subir/tomar fotos */
+    .image-upload-container {
+        margin-top: 12px;
+    }
+    
+    .btn-image-upload {
+        width: 100%;
+        padding: 12px 20px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 8px;
-        color: #7c3aed;
         font-size: 14px;
         font-weight: 500;
+        color: #333;
+        margin-bottom: 16px;
+    }
+    
+    .btn-image-upload:hover {
+        border-color: #c1121f;
+        background: #fef2f2;
+        color: #c1121f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(193, 18, 31, 0.15);
+    }
+    
+    .btn-image-upload span:first-child {
+        font-size: 20px;
+    }
+    
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+    }
+    
+    .image-preview-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #e0e0e0;
+        aspect-ratio: 1;
+    }
+    
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .image-preview-item .remove-image {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .image-preview-item .remove-image:hover {
+        background: rgba(220, 38, 38, 1);
+        transform: scale(1.1);
     }
 
     .summary-card {
@@ -394,6 +487,12 @@
         background: #d1fae5;
         border-left: 4px solid #10b981;
         color: #065f46;
+    }
+    
+    .alert-error {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
     }
 
     .alert-icon {
@@ -572,8 +671,35 @@
         </div>
     </div>
 
-    <form method="post" id="ticket-form">
+    <form method="post" id="ticket-form" enctype="multipart/form-data">
         {% csrf_token %}
+        
+        <!-- Mostrar mensajes de error -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-box {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" style="margin-bottom: 24px;">
+                    <span class="alert-icon">{% if message.tags == 'error' %}❌{% elif message.tags == 'success' %}✓{% else %}ℹ️{% endif %}</span>
+                    <div class="alert-text">{{ message }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Mostrar errores del formulario -->
+        {% if form.errors %}
+            <div class="alert-box alert-error" style="margin-bottom: 24px;">
+                <span class="alert-icon">❌</span>
+                <div class="alert-text">
+                    <strong>Por favor, corrige los siguientes errores:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
         
         <!-- Paso 1: Ubicación y Departamento -->
         <div class="form-card form-step active" data-step="1">
@@ -620,39 +746,12 @@
             <h2 class="step-title">Categoría y Subcategoría</h2>
             <p class="step-subtitle">Selecciona el tipo de problema</p>
             
-            <div class="category-selection">
-                <label style="margin-bottom: 16px; display: block; font-weight: 500;">¿Qué tipo de ayuda necesitas?</label>
-                <p style="color: #666; margin-bottom: 24px; font-size: 14px;">Selecciona la categoría, subcategoría y prioridad de tu problema.</p>
-                
-                <div class="category-options" id="category-options">
-                    {% for categoria in categorias %}
-                    <div class="category-option" data-category-id="{{ categoria.id }}" data-categoria-nombre="{{ categoria.nombre }}">
-                        <div class="category-radio"></div>
-                        <div class="category-name">{{ categoria.nombre }}</div>
-                        <div class="category-desc">Soporte técnico especializado para {{ categoria.nombre|lower }}</div>
-                        <div class="category-badge">
-                            <span>✓</span>
-                            <span>Categoría de soporte</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
+            <div class="form-group">
+                <label for="id_categoria">{{ form.categoria.label }}</label>
                 {{ form.categoria }}
                 {% if form.categoria.errors %}
                     <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.categoria.errors }}</div>
                 {% endif %}
-                <style>
-                    #id_categoria {
-                        display: none;
-                    }
-                </style>
-
-            </div>
-
-            <div id="selected-category-badge" class="selected-badge" style="display: none;">
-                <span>✓</span>
-                <span id="selected-category-text"></span>
             </div>
 
             <div class="form-group" id="subcategoria-container" style="display: none; margin-top: 24px;">
@@ -666,10 +765,38 @@
 
             <div class="form-group">
                 <label for="descripcion">Descripción detallada</label>
-                {{ form.descripcion }}
+                <div class="descripcion-wrapper">
+                    {{ form.descripcion }}
+                    <button type="button" class="mic-button" id="mic-button" title="Haz clic para hablar">
+                        🎤
+                    </button>
+                    <div class="speech-status" id="speech-status">
+                        <span class="status-dot"></span>
+                        <span id="speech-status-text">Escuchando...</span>
+                    </div>
+                </div>
+                <p style="color: #666; font-size: 13px; margin-top: 8px;">
+                    💡 <strong>Tip:</strong> Haz clic en el micrófono para dictar tu descripción con voz
+                </p>
                 {% if form.descripcion.errors %}
                     <div style="color: #c33; font-size: 14px; margin-top: 8px;">{{ form.descripcion.errors }}</div>
                 {% endif %}
+            </div>
+
+            <!-- Campo para imágenes -->
+            <div class="form-group">
+                <label>Imágenes (opcional - máximo 2)</label>
+                <div class="image-upload-container">
+                    <button type="button" class="btn-image-upload" id="btn-upload-image">
+                        <span>📷</span>
+                        <span>Subir o tomar foto</span>
+                    </button>
+                    <input type="file" id="id_imagenes" name="imagenes" multiple accept="image/*" capture="environment" style="display: none;">
+                    <div class="image-preview-container" id="image-preview-container"></div>
+                </div>
+                <p style="color: #666; font-size: 13px; margin-top: 8px;">
+                    💡 Puedes subir o tomar hasta 2 fotos. En móvil, se abrirá la cámara automáticamente.
+                </p>
             </div>
 
             <div class="navigation-buttons">
@@ -729,7 +856,7 @@
 
             <div class="navigation-buttons">
                 <button type="button" class="btn btn-secondary" onclick="prevStep()">Anterior</button>
-                <button type="submit" class="btn btn-primary">Enviar solicitud de soporte</button>
+                <button type="submit" class="btn btn-primary" onclick="return validateAndSubmit(event)">Enviar solicitud de soporte</button>
             </div>
         </div>
         </form>
@@ -810,6 +937,65 @@ function updateProgress() {
     }
 }
 
+// Función para validar y enviar el formulario
+function validateAndSubmit(event) {
+    event.preventDefault();
+    
+    // Verificar que la categoría esté seleccionada
+    const categoriaSelect = document.getElementById('id_categoria');
+    if (!categoriaSelect || !categoriaSelect.value) {
+        alert('Por favor, selecciona una categoría antes de enviar.');
+        // Volver al paso 2
+        currentStep = 2;
+        updateProgress();
+        return false;
+    }
+    
+    // Verificar descripción
+    const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
+    if (!descripcionTextarea || !descripcionTextarea.value || !descripcionTextarea.value.trim()) {
+        alert('Por favor, ingresa una descripción del problema antes de enviar.');
+        // Volver al paso 2
+        currentStep = 2;
+        updateProgress();
+        return false;
+    }
+    
+    // Verificar y asegurar que las imágenes estén en el input antes de enviar
+    const fileInput = document.getElementById('id_imagenes');
+    if (fileInput) {
+        console.log('🔍 Verificando archivos antes de enviar...');
+        console.log('   - Archivos en input:', fileInput.files.length);
+        console.log('   - selectedFiles (global):', typeof window.selectedFiles !== 'undefined' ? window.selectedFiles.length : 'no definido');
+        
+        // Si hay archivos seleccionados pero no están en el input, actualizarlos
+        if (typeof window.selectedFiles !== 'undefined' && window.selectedFiles.length > 0) {
+            console.log('   - Actualizando input con archivos seleccionados...');
+            const dataTransfer = new DataTransfer();
+            window.selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            fileInput.files = dataTransfer.files;
+            console.log('   - Archivos actualizados en input:', fileInput.files.length);
+        }
+        
+        // Verificar nuevamente
+        if (fileInput.files.length > 0) {
+            console.log('   ✅ Archivos listos para enviar:', fileInput.files.length);
+            for (let i = 0; i < fileInput.files.length; i++) {
+                console.log(`      ${i + 1}. ${fileInput.files[i].name} (${fileInput.files[i].size} bytes)`);
+            }
+        } else {
+            console.log('   ⚠️ No hay archivos en el input');
+        }
+    }
+    
+    // Si todo está bien, enviar el formulario
+    console.log('📤 Enviando formulario...');
+    document.getElementById('ticket-form').submit();
+    return true;
+}
+
 function nextStep() {
     // Validar campos antes de avanzar
     if (currentStep === 1) {
@@ -820,21 +1006,10 @@ function nextStep() {
         const categoriaSelect = document.getElementById('id_categoria');
         const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
         
-        // Verificar si hay una categoría seleccionada (tanto en el select como en las cards)
-        const categoriaValue = categoriaSelect ? categoriaSelect.value : '';
-        const categoriaSeleccionada = document.querySelector('.category-option.selected');
-        
-        if (!categoriaValue && !categoriaSeleccionada) {
+        // Verificar si hay una categoría seleccionada
+        if (!categoriaSelect || !categoriaSelect.value) {
             alert('Por favor, selecciona una categoría antes de continuar.');
             return;
-        }
-        
-        // Si hay una card seleccionada pero el select no tiene valor, actualizarlo
-        if (categoriaSeleccionada && !categoriaValue) {
-            const categoryId = categoriaSeleccionada.getAttribute('data-category-id');
-            if (categoriaSelect) {
-                categoriaSelect.value = categoryId;
-            }
         }
         
         // Verificar descripción
@@ -890,42 +1065,6 @@ function prevStep() {
         setTimeout(() => {
             updateProgress();
         }, 150);
-    }
-}
-
-function selectCategory(categoryId) {
-    // Convertir categoryId a string para asegurar que coincida
-    const categoryIdStr = String(categoryId);
-    
-    document.querySelectorAll('.category-option').forEach(opt => {
-        opt.classList.remove('selected');
-    });
-    
-    const selectedOption = document.querySelector(`[data-category-id="${categoryId}"]`);
-    if (selectedOption) {
-        selectedOption.classList.add('selected');
-        
-        // Actualizar el select oculto de categoría
-        const categoriaSelect = document.getElementById('id_categoria');
-        if (categoriaSelect) {
-            categoriaSelect.value = categoryIdStr;
-            // Disparar evento change para asegurar que se actualice
-            categoriaSelect.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        const categoryName = selectedOption.querySelector('.category-name').textContent;
-        const badgeText = document.getElementById('selected-category-text');
-        const badge = document.getElementById('selected-category-badge');
-        if (badgeText) badgeText.textContent = `Categoría: ${categoryName}`;
-        if (badge) badge.style.display = 'flex';
-        
-        // Cargar subcategorías
-        loadSubcategorias(categoryId);
-        
-        // Actualizar resumen si estamos en el paso 3
-        if (currentStep === totalSteps) {
-            updateSummary();
-        }
     }
 }
 
@@ -1006,14 +1145,19 @@ function loadSubcategorias(categoriaId) {
                 $(select).select2({
                     placeholder: 'Buscar y seleccionar subcategoría...',
                     allowClear: true,
+                    minimumInputLength: 0,  // Permitir búsqueda desde el primer carácter
                     language: {
                         noResults: function() {
                             return "No se encontraron resultados";
                         },
                         searching: function() {
                             return "Buscando...";
+                        },
+                        inputTooShort: function() {
+                            return "Escribe para buscar...";
                         }
-                    }
+                    },
+                    width: '100%'
                 }).on('change', function() {
                     updateSummary();
                     // Si estamos en el paso 3, actualizar resumen
@@ -1047,11 +1191,13 @@ function loadSubcategorias(categoriaId) {
                 $(select).select2({
                     placeholder: 'No hay subcategorías disponibles',
                     allowClear: false,
+                    minimumInputLength: 0,
                     language: {
                         noResults: function() {
                             return "No hay subcategorías disponibles";
                         }
-                    }
+                    },
+                    width: '100%'
                 });
             }
         })
@@ -1066,7 +1212,9 @@ function loadSubcategorias(categoriaId) {
             // Reinicializar Select2 incluso con error
             $(select).select2({
                 placeholder: 'Error al cargar subcategorías',
-                allowClear: false
+                allowClear: false,
+                minimumInputLength: 0,
+                width: '100%'
             });
         });
 }
@@ -1100,14 +1248,19 @@ function loadDependencias(sedeId) {
             $(select).select2({
                 placeholder: 'Buscar y seleccionar dependencia...',
                 allowClear: true,
+                minimumInputLength: 0,  // Permitir búsqueda desde el primer carácter
                 language: {
                     noResults: function() {
                         return "No se encontraron resultados";
                     },
                     searching: function() {
                         return "Buscando...";
+                    },
+                    inputTooShort: function() {
+                        return "Escribe para buscar...";
                     }
-                }
+                },
+                width: '100%'
             }).on('change', function() {
                 updateSummary();
             });
@@ -1156,15 +1309,8 @@ function updateSummary() {
     
     // Actualizar Categoría
     let categoriaName = '-';
-    // Intentar obtener de la card seleccionada primero
-    const categoriaSeleccionada = document.querySelector('.category-option.selected');
-    if (categoriaSeleccionada) {
-        categoriaName = categoriaSeleccionada.querySelector('.category-name')?.textContent || '-';
-    } else if (categoriaSelect && categoriaSelect.value) {
-        const categoriaOption = document.querySelector(`[data-category-id="${categoriaSelect.value}"]`);
-        if (categoriaOption) {
-            categoriaName = categoriaOption.querySelector('.category-name')?.textContent || '-';
-        }
+    if (categoriaSelect && categoriaSelect.selectedIndex >= 0) {
+        categoriaName = categoriaSelect.options[categoriaSelect.selectedIndex]?.text || '-';
     }
     
     const summaryCategoria = document.getElementById('summary-categoria');
@@ -1217,14 +1363,19 @@ function initSelect2() {
             $(sedeSelect).select2({
                 placeholder: 'Buscar y seleccionar sede...',
                 allowClear: true,
+                minimumInputLength: 0,  // Permitir búsqueda desde el primer carácter
                 language: {
                     noResults: function() {
                         return "No se encontraron resultados";
                     },
                     searching: function() {
                         return "Buscando...";
+                    },
+                    inputTooShort: function() {
+                        return "Escribe para buscar...";
                     }
-                }
+                },
+                width: '100%'
             }).on('change', function() {
                 updateSummary();
                 // Filtrar dependencias por sede
@@ -1251,6 +1402,50 @@ function initSelect2() {
         console.warn('No se encontró el select de Sede');
     }
     
+    // Inicializar Select2 para Categoría
+    const categoriaSelect = document.getElementById('id_categoria');
+    if (categoriaSelect) {
+        // Destruir Select2 si ya está inicializado
+        if ($(categoriaSelect).hasClass('select2-hidden-accessible')) {
+            $(categoriaSelect).select2('destroy');
+        }
+        
+        try {
+            $(categoriaSelect).select2({
+                placeholder: 'Buscar y seleccionar categoría...',
+                allowClear: false,
+                minimumInputLength: 0,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    },
+                    inputTooShort: function() {
+                        return "Escribe para buscar...";
+                    }
+                },
+                width: '100%'
+            }).on('change', function() {
+                if (this.value) {
+                    loadSubcategorias(this.value);
+                } else {
+                    const subcategoryContainer = document.getElementById('subcategoria-container');
+                    if (subcategoryContainer) {
+                        subcategoryContainer.style.display = 'none';
+                    }
+                }
+                updateSummary();
+            });
+            console.log('Select2 inicializado para Categoría');
+        } catch (error) {
+            console.error('Error al inicializar Select2 para Categoría:', error);
+        }
+    } else {
+        console.warn('No se encontró el select de Categoría');
+    }
+    
     // Inicializar Select2 para Dependencia
     const dependenciaSelect = document.getElementById('id_dependencia');
     if (dependenciaSelect) {
@@ -1263,14 +1458,19 @@ function initSelect2() {
             $(dependenciaSelect).select2({
                 placeholder: 'Buscar y seleccionar dependencia...',
                 allowClear: true,
+                minimumInputLength: 0,  // Permitir búsqueda desde el primer carácter
                 language: {
                     noResults: function() {
                         return "No se encontraron resultados";
                     },
                     searching: function() {
                         return "Buscando...";
+                    },
+                    inputTooShort: function() {
+                        return "Escribe para buscar...";
                     }
-                }
+                },
+                width: '100%'
             }).on('change', function() {
                 updateSummary();
             });
@@ -1294,14 +1494,19 @@ function initSelect2() {
             $(subcategoriaSelect).select2({
                 placeholder: 'Buscar y seleccionar subcategoría...',
                 allowClear: true,
+                minimumInputLength: 0,  // Permitir búsqueda desde el primer carácter
                 language: {
                     noResults: function() {
                         return "No se encontraron resultados";
                     },
                     searching: function() {
                         return "Buscando...";
+                    },
+                    inputTooShort: function() {
+                        return "Escribe para buscar...";
                     }
-                }
+                },
+                width: '100%'
             }).on('change', function() {
                 updateSummary();
                 // Si estamos en el paso 3, actualizar resumen
@@ -1337,40 +1542,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Comenzar a esperar por Select2
     waitForSelect2();
     
-    // Agregar event listeners a las opciones de categoría
-    document.querySelectorAll('.category-option').forEach(option => {
-        option.addEventListener('click', function() {
-            const categoryId = parseInt(this.getAttribute('data-category-id'));
-            selectCategory(categoryId);
-        });
-    });
-    
-    // Agregar event listeners a las opciones de subcategoría (se agregarán dinámicamente)
-    
-    // Preseleccionar categoría si existe
-    const initialCategory = document.getElementById('id_categoria').value;
-    if (initialCategory) {
-        selectCategory(parseInt(initialCategory));
-    }
-    
     // Cargar dependencias si hay una sede preseleccionada
-    const initialSede = document.getElementById('id_sede').value;
-    if (initialSede) {
-        loadDependencias(initialSede);
-    }
-    
-    // Manejar cambios en select de categoría
-    const categoriaSelect = document.getElementById('id_categoria');
-    if (categoriaSelect) {
-        categoriaSelect.addEventListener('change', function() {
-            if (this.value) {
-                selectCategory(parseInt(this.value));
-            }
-        });
-    }
-    
-    // Actualizar resumen cuando cambian los campos
     const sedeSelect = document.getElementById('id_sede');
+    if (sedeSelect && sedeSelect.value) {
+        loadDependencias(sedeSelect.value);
+    }
+    
+    // Cargar subcategorías si hay una categoría preseleccionada (ya se maneja en initSelect2)
+    const categoriaSelect = document.getElementById('id_categoria');
+    if (categoriaSelect && categoriaSelect.value) {
+        loadSubcategorias(categoriaSelect.value);
+    }
+    
+    // Actualizar resumen cuando cambian los campos (sedeSelect ya obtenido arriba)
     const dependenciaSelect = document.getElementById('id_dependencia');
     const subcategoriaSelect = document.getElementById('id_subcategoria');
     const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
@@ -1407,7 +1591,326 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateSummary();
             }
         });
+    }
+    
+    // Inicializar reconocimiento de voz (Speech-to-Text) después de un pequeño delay
+    setTimeout(function() {
+        initSpeechRecognition();
+    }, 500);
+    
+    // Inicializar funcionalidad de imágenes
+    initImageUpload();
+});
+
+// Función para inicializar el reconocimiento de voz
+function initSpeechRecognition() {
+    console.log('Inicializando reconocimiento de voz...');
+    
+    const micButton = document.getElementById('mic-button');
+    const descripcionTextarea = document.getElementById('descripcion') || document.getElementById('id_descripcion');
+    const speechStatus = document.getElementById('speech-status');
+    const speechStatusText = document.getElementById('speech-status-text');
+    
+    console.log('Elementos encontrados:', {
+        micButton: !!micButton,
+        descripcionTextarea: !!descripcionTextarea,
+        speechStatus: !!speechStatus,
+        speechStatusText: !!speechStatusText
+    });
+    
+    if (!micButton) {
+        console.error('No se encontró el botón de micrófono');
+        return;
+    }
+    
+    if (!descripcionTextarea) {
+        console.error('No se encontró el textarea de descripción');
+        return;
+    }
+    
+    // Verificar si el navegador soporta reconocimiento de voz
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    console.log('SpeechRecognition disponible:', !!SpeechRecognition);
+    
+    if (!SpeechRecognition) {
+        // El navegador no soporta reconocimiento de voz
+        console.warn('El navegador no soporta reconocimiento de voz');
+        micButton.disabled = true;
+        micButton.title = 'Tu navegador no soporta reconocimiento de voz. Usa Chrome, Edge o Safari.';
+        micButton.style.opacity = '0.5';
+        micButton.style.cursor = 'not-allowed';
+        alert('Tu navegador no soporta reconocimiento de voz. Por favor, usa Chrome, Edge o Safari para esta funcionalidad.');
+        return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES'; // Español
+    recognition.continuous = true; // Continuar escuchando
+    recognition.interimResults = true; // Mostrar resultados intermedios
+    
+    let isRecording = false;
+    let finalTranscript = '';
+    
+    // Función para actualizar el estado visual
+    function updateStatus(text, isActive, isRecordingState) {
+        if (speechStatus && speechStatusText) {
+            speechStatusText.textContent = text;
+            speechStatus.classList.toggle('active', isActive);
+            speechStatus.classList.toggle('recording', isRecordingState);
+        }
+        
+        if (micButton) {
+            micButton.classList.toggle('recording', isRecordingState);
+        }
+    }
+    
+    // Evento cuando se inicia el reconocimiento
+    recognition.onstart = function() {
+        console.log('Reconocimiento de voz iniciado');
+        isRecording = true;
+        finalTranscript = descripcionTextarea.value || '';
+        updateStatus('Escuchando...', true, true);
+        micButton.textContent = '🔴';
+        micButton.title = 'Haz clic para detener';
+    };
+    
+    // Evento cuando se reciben resultados
+    recognition.onresult = function(event) {
+        console.log('Resultado recibido:', event);
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        // Actualizar el textarea con el texto final + intermedio
+        descripcionTextarea.value = finalTranscript + interimTranscript;
+        
+        // Actualizar resumen si estamos en el paso 3
+        if (typeof currentStep !== 'undefined' && currentStep === totalSteps) {
+            updateSummary();
+        }
+        
+        // Disparar evento input para que otros listeners se activen
+        descripcionTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    
+    // Evento cuando hay un error
+    recognition.onerror = function(event) {
+        console.error('Error en reconocimiento de voz:', event.error);
+        isRecording = false;
+        updateStatus('', false, false);
+        micButton.textContent = '🎤';
+        micButton.title = 'Haz clic para hablar';
+        
+        let errorMessage = 'Error al reconocer voz';
+        switch(event.error) {
+            case 'no-speech':
+                errorMessage = 'No se detectó voz. Intenta de nuevo.';
+                break;
+            case 'audio-capture':
+                errorMessage = 'No se pudo acceder al micrófono. Verifica los permisos en la configuración del navegador.';
+                break;
+            case 'not-allowed':
+                errorMessage = 'Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en la configuración del navegador y recarga la página.';
+                break;
+            case 'network':
+                errorMessage = 'Error de red. Verifica tu conexión a internet.';
+                break;
+            case 'aborted':
+                // Ignorar errores de aborto (cuando se detiene manualmente)
+                return;
+        }
+        
+        alert(errorMessage);
+    };
+    
+    // Evento cuando termina el reconocimiento
+    recognition.onend = function() {
+        console.log('Reconocimiento de voz terminado');
+        isRecording = false;
+        updateStatus('', false, false);
+        micButton.textContent = '🎤';
+        micButton.title = 'Haz clic para hablar';
+    };
+    
+    // Manejar clic en el botón de micrófono
+    micButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Botón de micrófono clickeado, isRecording:', isRecording);
+        
+        if (isRecording) {
+            // Detener el reconocimiento
+            console.log('Deteniendo reconocimiento...');
+            recognition.stop();
+            updateStatus('', false, false);
+        } else {
+            // Iniciar el reconocimiento
+            console.log('Iniciando reconocimiento...');
+            try {
+                finalTranscript = descripcionTextarea.value || '';
+                recognition.start();
+            } catch (error) {
+                console.error('Error al iniciar reconocimiento:', error);
+                alert('No se pudo iniciar el reconocimiento de voz. Error: ' + error.message + '\n\nAsegúrate de que el navegador tenga permisos para usar el micrófono.');
+            }
         }
     });
+    
+    // Permitir detener con Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && isRecording) {
+            recognition.stop();
+        }
+    });
+    
+    console.log('Reconocimiento de voz inicializado correctamente');
+}
+
+// Función para inicializar la funcionalidad de subir/tomar fotos
+function initImageUpload() {
+    const btnUploadImage = document.getElementById('btn-upload-image');
+    const fileInput = document.getElementById('id_imagenes');
+    const previewContainer = document.getElementById('image-preview-container');
+    
+    const MAX_IMAGES = 2;
+    let selectedFiles = [];
+    
+    // Hacer selectedFiles global para que esté disponible en validateAndSubmit
+    window.selectedFiles = selectedFiles;
+    
+    if (!btnUploadImage || !fileInput || !previewContainer) {
+        console.warn('No se encontraron los elementos necesarios para la subida de imágenes');
+        return;
+    }
+    
+    // Función para mostrar previsualización de imágenes
+    function updatePreview() {
+        previewContainer.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'image-preview-item';
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="remove-image" data-index="${index}">×</button>
+                `;
+                previewContainer.appendChild(previewItem);
+                
+                // Agregar evento para eliminar imagen
+                previewItem.querySelector('.remove-image').addEventListener('click', function() {
+                    removeImage(index);
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Actualizar el input file con los archivos seleccionados
+        updateFileInput();
+        
+        // Actualizar estado del botón
+        updateButtonState();
+    }
+    
+    // Función para actualizar el estado del botón
+    function updateButtonState() {
+        if (selectedFiles.length >= MAX_IMAGES) {
+            btnUploadImage.disabled = true;
+            btnUploadImage.style.opacity = '0.6';
+            btnUploadImage.style.cursor = 'not-allowed';
+            btnUploadImage.title = `Máximo ${MAX_IMAGES} imágenes permitidas`;
+        } else {
+            btnUploadImage.disabled = false;
+            btnUploadImage.style.opacity = '1';
+            btnUploadImage.style.cursor = 'pointer';
+            btnUploadImage.title = `Subir o tomar foto (${selectedFiles.length}/${MAX_IMAGES})`;
+        }
+    }
+    
+    // Función para actualizar el input file
+    function updateFileInput() {
+        console.log('🔄 Actualizando input file con', selectedFiles.length, 'archivo(s)');
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+            console.log('   - Agregando archivo:', file.name, `(${file.size} bytes)`);
+        });
+        fileInput.files = dataTransfer.files;
+        console.log('   ✅ Input actualizado. Archivos en input:', fileInput.files.length);
+        
+        // Actualizar también la variable global
+        window.selectedFiles = selectedFiles;
+    }
+    
+    // Función para agregar archivos
+    function addFiles(files) {
+        const remainingSlots = MAX_IMAGES - selectedFiles.length;
+        
+        if (remainingSlots <= 0) {
+            alert(`Ya has alcanzado el máximo de ${MAX_IMAGES} imágenes. Elimina una imagen antes de agregar otra.`);
+            return;
+        }
+        
+        const filesToAdd = Array.from(files).slice(0, remainingSlots);
+        const filesToReject = Array.from(files).slice(remainingSlots);
+        
+        filesToAdd.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                selectedFiles.push(file);
+                console.log('   ✅ Archivo agregado:', file.name, `(${file.size} bytes, ${file.type})`);
+            } else {
+                console.log('   ⚠️ Archivo ignorado (no es imagen):', file.name, `(${file.type})`);
+            }
+        });
+        
+        // Actualizar variable global
+        window.selectedFiles = selectedFiles;
+        
+        if (filesToReject.length > 0) {
+            alert(`Solo se pueden agregar hasta ${MAX_IMAGES} imágenes. Se agregaron ${filesToAdd.length} imagen(es) y se ignoraron ${filesToReject.length}.`);
+        }
+        
+        updatePreview();
+    }
+    
+    // Función para eliminar imagen
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        window.selectedFiles = selectedFiles; // Actualizar global
+        updatePreview();
+    }
+    
+    // Botón para subir/tomar foto (funciona igual en web y móvil)
+    btnUploadImage.addEventListener('click', function() {
+        if (selectedFiles.length >= MAX_IMAGES) {
+            alert(`Ya has alcanzado el máximo de ${MAX_IMAGES} imágenes. Elimina una imagen antes de agregar otra.`);
+            return;
+        }
+        fileInput.click();
+    });
+    
+    // Manejar selección de archivos (funciona para subir y tomar foto)
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            addFiles(e.target.files);
+            // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
+            fileInput.value = '';
+        }
+    });
+    
+    // Inicializar estado del botón
+    updateButtonState();
+    
+    console.log('Funcionalidad de imágenes inicializada correctamente');
+}
 </script>
 {% endblock %}

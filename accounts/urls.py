@@ -24,4 +24,7 @@ urlpatterns = [
     # URLs para subida de usuarios desde Excel
     path('upload-excel/', views.user_upload_excel, name='upload_excel'),
     path('download-template/', views.user_download_template, name='download_template'),
+    
+    # URL para perfil de usuario
+    path('perfil/', views.profile, name='profile'),
 ]
