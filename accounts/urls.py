@@ -20,4 +20,8 @@ urlpatterns = [
     path('telegram-grupos/<int:pk>/edit/', views.telegram_grupo_edit, name='telegram_grupo_edit'),
     path('telegram-grupos/<int:pk>/delete/', views.telegram_grupo_delete, name='telegram_grupo_delete'),
     path('telegram-grupos/obtener-chat-id/', views.obtener_grupo_chat_id, name='obtener_grupo_chat_id'),
+    
+    # URLs para subida de usuarios desde Excel
+    path('upload-excel/', views.user_upload_excel, name='upload_excel'),
+    path('download-template/', views.user_download_template, name='download_template'),
 ]
